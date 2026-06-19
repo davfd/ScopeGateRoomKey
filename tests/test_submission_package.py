@@ -139,6 +139,38 @@ def test_browser_receipt_contract_harness_fails_on_divergent_site_receipt(tmp_pa
     assert 'browser_site_canonical_receipt_match=FAIL' in negative.stdout
 
 
+def test_site_exposes_actual_backend_workflow_not_toy_gate_only():
+    html = (ROOT / 'site' / 'index.html').read_text(encoding='utf-8')
+    verifier = (ROOT / 'site' / 'verifier.js').read_text(encoding='utf-8')
+
+    for needle in [
+        'Actual backend workflow',
+        'Play actual receipt run',
+        'Backend event stream',
+        'Live Band messages',
+        'Gate engine',
+        'Context releases',
+        'Reviewer deposits',
+        'Post-revocation blocks',
+        'id="workflow-stage-list"',
+        'id="workflow-event-stream"',
+        'id="workflow-object-detail"',
+    ]:
+        assert needle in html
+
+    for needle in [
+        'buildBackendWorkflow',
+        'renderBackendWorkflow',
+        'playActualReceiptRun',
+        'review_gate.adjudicated',
+        'context.replay_blocked',
+        'receipt.sealed',
+        'workflow-event-stream',
+        'workflow-object-detail',
+    ]:
+        assert needle in verifier
+
+
 def test_public_copy_rule_map_and_banned_claims():
     combined = '\n'.join(
         path.read_text(encoding='utf-8')

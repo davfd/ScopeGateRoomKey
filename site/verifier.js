@@ -151,6 +151,140 @@ function initScopeGateDemo() {
   });
   renderScopeGateDemo();
 }
+
+let currentBackendWorkflow = null;
+let workflowStageIndex = 0;
+let workflowTimer = null;
+function shortId(value) {
+  return value ? String(value).slice(0, 8) + '…' + String(value).slice(-6) : 'none';
+}
+function summarizeEventPayload(event) {
+  const payload = event.payload || {};
+  if (event.type === 'action.blocked') return `blocked ${payload.action_kind || 'action'}: ${payload.decision?.reason || 'denied'} / ${payload.decision?.state || 'state unknown'}`;
+  if (event.type === 'grant.granted') return `grant ${payload.grant_id || ''}: ${payload.allowed_agents?.length || 0} agents, ${(payload.allowed_context_keys || []).join(', ')}`;
+  if (event.type === 'grant.requested') return `requested ${(payload.requested_agents || []).length} agents and ${(payload.requested_context_keys || []).length} context keys`;
+  if (event.type === 'participant.added') return `${payload.agent || 'agent'} added after ${payload.decision?.state || 'grant check'}`;
+  if (event.type === 'context.released') return `${payload.context_key}: ${payload.value_chars} chars, raw posted = ${payload.raw_value_posted_to_band}, hash ${shortId(payload.value_sha256)}`;
+  if (event.type === 'context.replay_blocked') return `${payload.participant || 'late participant'} recovered=${payload.recovered}; release_allowed=${payload.release_allowed}`;
+  if (event.type === 'reviewer.deposit') return `${payload.reviewer || event.actor}: ${payload.verdict}, independent=${payload.independent}, raw posted=${payload.raw_value_posted_to_band}`;
+  if (event.type === 'review_gate.adjudicated') return `${payload.final_outcome || 'outcome'} with ${payload.reviewer_count || 0} reviewers / ${payload.threshold_rule || 'threshold'}`;
+  if (event.type === 'grant.revoked') return `grant ${payload.grant_id || ''} revoked: ${payload.reason || 'complete'}`;
+  if (event.type === 'context.blocked') return `${payload.context_key || 'context'} blocked: ${payload.decision?.reason || 'denied'} / ${payload.decision?.state || 'state unknown'}`;
+  if (event.type === 'receipt.sealed') return `receipt sealed for ${payload.case_id || 'case'} in ${payload.mode || 'mode'}`;
+  if (event.type === 'naive.baseline') return `naive path would leak=${payload.would_leak_canary}; raw canary posted=${payload.raw_canary_posted_to_band}`;
+  if (event.type === 'demo.started') return `case ${payload.case_id}; raw protected posted=${payload.raw_protected_payload_posted}`;
+  return Object.keys(payload).slice(0, 4).join(', ') || 'receipt event';
+}
+function buildBackendWorkflow(receipt, evidence) {
+  const events = (receipt.live_gate_events || []).map((event, index) => ({ ...event, index: index + 1 }));
+  const preGrantBlocked = event => event.type === 'action.blocked' && event.payload?.phase === 'pre_grant';
+  const postGrantBlocked = event => event.type === 'action.blocked' && event.payload?.phase === 'post_revocation';
+  const stages = [
+    {
+      key: 'intake',
+      title: '1. Intake + gate block',
+      copy: 'The requester starts the supplier bank-change review. Before a human grant exists, the action agent is blocked and no protected payload enters Band.',
+      accept: event => ['demo.started', 'naive.baseline'].includes(event.type) || preGrantBlocked(event),
+      detail: () => ({ case_id: receipt.case_id, blocked_attempts: receipt.blocked_attempts?.filter(item => item.phase === 'pre_grant'), naive_leak_radius: receipt.naive_leak_radius, secret_canary_pre_grant_seen: receipt.secret_canary_pre_grant_seen })
+    },
+    {
+      key: 'grant',
+      title: '2. Human scope grant',
+      copy: 'ScopeGate records a narrow grant: one case, named agents, allowed action kinds, and allowed context keys.',
+      accept: event => ['grant.requested', 'grant.granted', 'participant.added'].includes(event.type),
+      detail: () => ({ grant_id: receipt.grant_id, allowed_agents: receipt.grant?.allowed_agents, allowed_context_keys: receipt.grant?.allowed_context_keys, allowed_action_kinds: receipt.grant?.allowed_action_kinds, expires_at: receipt.grant?.expires_at })
+    },
+    {
+      key: 'release',
+      title: '3. Context releases + replay block',
+      copy: 'The backend releases safe context as hashes/counts. A late unapproved participant asks for replay and recovers nothing.',
+      accept: event => ['context.released', 'context.replay_blocked'].includes(event.type),
+      detail: () => ({ context_releases: receipt.context_releases, late_participant_probes: receipt.late_participant_probes })
+    },
+    {
+      key: 'review',
+      title: '4. Reviewer deposits + adjudication',
+      copy: 'Three reviewer agents deposit independent decisions tied to the scoped context. The review gate adjudicates the result.',
+      accept: event => ['reviewer.deposit', 'review_gate.adjudicated'].includes(event.type),
+      detail: () => ({ reviewer_deposits: receipt.reviewer_deposits, review_gate: receipt.review_gate })
+    },
+    {
+      key: 'revoke',
+      title: '5. Revoke + post-revocation blocks',
+      copy: 'The operator revokes the grant. Later action/context attempts fail closed because the key is no longer valid.',
+      accept: event => event.type === 'grant.revoked' || event.type === 'context.blocked' || postGrantBlocked(event),
+      detail: () => ({ revocations: receipt.revocations, post_revocation_blocks: receipt.post_revocation_blocks })
+    },
+    {
+      key: 'seal',
+      title: '6. Receipt sealed + browser proof',
+      copy: 'The run closes with a receipt hash, transcript hash, secret scan, and browser-verifiable public proof bundle.',
+      accept: event => event.type === 'receipt.sealed',
+      detail: () => ({ receipt_sha256: receipt.receipt_sha256, transcript_sha256: receipt.transcript_sha256, policy_log_sha256: receipt.policy_log_sha256, band_secret_scan: receipt.band_secret_scan, evidence_receipt_sha256: evidence.canonical_receipt_sha256 })
+    }
+  ].map(stage => ({ ...stage, events: events.filter(stage.accept), detail: stage.detail() }));
+  return { receipt, evidence, events, stages };
+}
+function renderBackendWorkflow(workflow, index) {
+  if (!workflow || !document.getElementById('workflow-stage-list')) return;
+  currentBackendWorkflow = workflow;
+  workflowStageIndex = Math.max(0, Math.min(index || 0, workflow.stages.length - 1));
+  const stage = workflow.stages[workflowStageIndex];
+  setText('workflow-band-count', String(workflow.receipt.band_message_ids?.length || 0));
+  setText('workflow-gate-count', String(workflow.events.length));
+  setText('workflow-context-count', String(workflow.receipt.context_releases?.length || 0));
+  setText('workflow-reviewer-count', String(workflow.receipt.reviewer_deposits?.length || 0));
+  setText('workflow-block-count', String(workflow.receipt.post_revocation_blocks?.length || 0));
+  setText('workflow-stage-title', stage.title);
+  setText('workflow-stage-copy', stage.copy);
+  const stageList = document.getElementById('workflow-stage-list');
+  stageList.innerHTML = workflow.stages.map((item, i) => `
+    <button class="workflow-stage ${i === workflowStageIndex ? 'active' : ''}" type="button" data-workflow-stage="${i}">
+      <strong>${escapeHtml(item.title)}</strong>
+      <span>${item.events.length} receipt events</span>
+    </button>
+  `).join('');
+  stageList.querySelectorAll('[data-workflow-stage]').forEach(button => {
+    button.addEventListener('click', () => renderBackendWorkflow(workflow, Number(button.getAttribute('data-workflow-stage'))));
+  });
+  const stream = document.getElementById('workflow-event-stream');
+  stream.innerHTML = stage.events.map(event => `
+    <article class="event-row">
+      <div class="event-top">
+        <strong>#${event.index} ${escapeHtml(event.actor || 'System')}</strong>
+        <span class="event-kind">${escapeHtml(event.type)}</span>
+      </div>
+      <p>${escapeHtml(summarizeEventPayload(event))}</p>
+      <span class="meta">Band message ${escapeHtml(shortId(event.band_message_id))} · content hash ${escapeHtml(shortId(event.band_content_sha256))}</span>
+    </article>
+  `).join('') || '<article class="event-row"><p>No events for this stage.</p></article>';
+  const detail = document.getElementById('workflow-object-detail');
+  detail.textContent = JSON.stringify(stage.detail, null, 2);
+}
+function playActualReceiptRun() {
+  if (!currentBackendWorkflow) return;
+  window.clearInterval(workflowTimer);
+  renderBackendWorkflow(currentBackendWorkflow, 0);
+  workflowTimer = window.setInterval(() => {
+    if (workflowStageIndex >= currentBackendWorkflow.stages.length - 1) {
+      window.clearInterval(workflowTimer);
+      return;
+    }
+    renderBackendWorkflow(currentBackendWorkflow, workflowStageIndex + 1);
+  }, 900);
+}
+function setupBackendWorkflowControls() {
+  const play = document.getElementById('workflow-play');
+  const seal = document.getElementById('workflow-seal');
+  if (play && !play.dataset.bound) {
+    play.dataset.bound = 'true';
+    play.addEventListener('click', playActualReceiptRun);
+  }
+  if (seal && !seal.dataset.bound) {
+    seal.dataset.bound = 'true';
+    seal.addEventListener('click', () => currentBackendWorkflow && renderBackendWorkflow(currentBackendWorkflow, currentBackendWorkflow.stages.length - 1));
+  }
+}
 async function fetchText(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(path + ' fetch status ' + response.status);
@@ -199,6 +333,9 @@ async function verify() {
   setText('hero-status', 'Checking');
   setText('hero-status-copy', 'The browser is checking the receipt, proof bundle, and pinned hashes now.');
   setText('seal-id', evidence.seal_post_message_id);
+  const backendWorkflow = buildBackendWorkflow(receipt, evidence);
+  renderBackendWorkflow(backendWorkflow, 0);
+  setupBackendWorkflowControls();
 
   try {
     validateEvidenceContract(evidence);

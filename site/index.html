@@ -113,6 +113,31 @@
     .grant-card .scope-list { margin:0; padding:0; list-style:none; display:grid; gap:9px; color:#dbeafe; }
     .grant-card .scope-list li { border:1px solid var(--line); border-radius:15px; padding:10px 12px; background:rgba(15,23,42,.74); }
     .grant-card .danger-note { border:1px solid rgba(251,113,133,.30); border-radius:18px; padding:12px 14px; color:#fecdd3; background:rgba(127,29,29,.16); }
+    .workflow-console { display:grid; grid-template-columns:minmax(280px,.74fr) minmax(0,1.26fr); gap:16px; align-items:start; }
+    .workflow-sidebar, .workflow-main { border:1px solid var(--line-strong); border-radius:28px; background:linear-gradient(180deg, rgba(15,23,42,.94), rgba(2,6,23,.80)); box-shadow:var(--shadow); overflow:hidden; }
+    .workflow-sidebar { padding:16px; display:grid; gap:10px; }
+    .workflow-stage { width:100%; text-align:left; border:1px solid var(--line); border-radius:17px; padding:13px 14px; background:rgba(15,23,42,.74); color:var(--ink); cursor:pointer; font:inherit; }
+    .workflow-stage strong { display:block; font-size:.98rem; }
+    .workflow-stage span { display:block; margin-top:4px; color:var(--muted); font-size:.84rem; }
+    .workflow-stage.active { border-color:rgba(103,232,249,.55); background:linear-gradient(180deg, rgba(14,116,144,.28), rgba(15,23,42,.82)); box-shadow:0 0 32px rgba(103,232,249,.16); }
+    .workflow-main-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(15,23,42,.84); }
+    .workflow-controls { display:flex; flex-wrap:wrap; gap:8px; }
+    .workflow-controls .demo-control { padding:10px 12px; }
+    .workflow-metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding:16px 18px 0; }
+    .workflow-metric { border:1px solid var(--line); border-radius:16px; padding:11px; background:rgba(15,23,42,.76); }
+    .workflow-metric strong { display:block; font-size:1.25rem; letter-spacing:-.04em; }
+    .workflow-metric span { color:var(--muted); font-size:.78rem; }
+    .workflow-content { display:grid; grid-template-columns:1.1fr .9fr; gap:14px; padding:18px; }
+    .event-stream { display:grid; gap:9px; max-height:520px; overflow:auto; }
+    .event-row { border:1px solid var(--line); border-radius:16px; padding:12px; background:rgba(15,23,42,.76); }
+    .event-row .event-top { display:flex; justify-content:space-between; gap:10px; align-items:start; }
+    .event-row strong { color:#e0f2fe; }
+    .event-row p { margin:7px 0 0; color:var(--muted); font-size:.9rem; }
+    .event-kind { display:inline-flex; align-items:center; border:1px solid rgba(103,232,249,.32); border-radius:999px; padding:4px 8px; color:#cffafe; background:rgba(14,165,233,.10); font-weight:950; font-size:.72rem; white-space:nowrap; }
+    .object-card { border:1px solid var(--line); border-radius:18px; padding:14px; background:rgba(2,6,23,.62); min-height:260px; }
+    .object-card h3 { margin:0 0 10px; }
+    .object-card pre { margin:0; max-height:450px; }
+    .workflow-note { margin:0; color:var(--muted); font-size:.92rem; }
     .note { margin-top:12px; padding:13px 15px; border:1px dashed rgba(103,232,249,.35); border-radius:18px; background:rgba(14,165,233,.08); color:#dbeafe; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
     .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
@@ -140,7 +165,7 @@
     .boundary { border:1px solid rgba(251,191,36,.30); border-radius:24px; padding:18px; background:rgba(120,53,15,.16); }
     .footer { margin-top:34px; color:var(--muted); font-size:.9rem; }
     @media (max-width: 980px) {
-      .hero-grid, .metrics, .scenario, .timeline, .interactive-demo, .demo-proof-strip, .demo-actions, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
+      .hero-grid, .metrics, .scenario, .timeline, .interactive-demo, .workflow-console, .workflow-metrics, .workflow-content, .demo-proof-strip, .demo-actions, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
       .nav { align-items:flex-start; flex-direction:column; }
       h1 { letter-spacing:-.06em; }
     }
@@ -152,6 +177,7 @@
       <div class="brand"><div class="mark">RK</div><span>RoomKey ScopeGate</span></div>
       <div class="nav-links">
         <a href="#story">Why it matters</a>
+        <a href="#workflow">Workflow</a>
         <a href="#demo">Demo</a>
         <a href="#proof">Proof</a>
         <a href="#verify">Verify it</a>
@@ -168,7 +194,8 @@
           <p class="lead">Agent rooms make multi-agent work fast. In regulated work, speed is not enough: <strong>a room is not permission to reveal sensitive context.</strong> RoomKey makes disclosure wait for a narrow human grant, then leaves a receipt a judge can check.</p>
           <p class="plain">This supplier bank-change run proves the bounded result: protected values did not enter shared Band history, late replay stayed blocked, and the site receipt still matches the sealed receipt.</p>
           <div class="cta-row">
-            <a class="btn primary" href="#demo">Try the gate</a>
+            <a class="btn primary" href="#workflow">Play actual receipt run</a>
+            <a class="btn" href="#demo">Try the gate</a>
             <a class="btn" href="#verify">Verify proof</a>
             <a class="btn" href="#proof">Download receipts</a>
           </div>
@@ -192,6 +219,53 @@
         <div class="metric"><strong id="replay-status">Checking</strong><span>late replay blocked</span></div>
       </div>
     </header>
+
+    <section id="workflow">
+      <div class="section-head">
+        <div>
+          <span class="kicker">Actual backend workflow</span>
+          <h2>Watch the sealed Band run, not a toy mockup.</h2>
+        </div>
+        <p>These panels are populated from the receipt JSON: gate events, Band message IDs, hashed context releases, reviewer deposits, revocation, replay block, and final seal.</p>
+      </div>
+      <div class="workflow-console" aria-label="Actual backend workflow receipt player">
+        <aside class="workflow-sidebar">
+          <span class="eyebrow">Backend event stream</span>
+          <p class="workflow-note">Click a stage or press play. Every row is backed by the sealed receipt and public evidence bundle.</p>
+          <div id="workflow-stage-list" aria-label="Workflow stages"></div>
+        </aside>
+        <div class="workflow-main">
+          <div class="workflow-main-head">
+            <div>
+              <h3 id="workflow-stage-title">Loading backend run…</h3>
+              <p class="workflow-note" id="workflow-stage-copy">Receipt data is loading from the public bundle.</p>
+            </div>
+            <div class="workflow-controls">
+              <button class="demo-control primary" type="button" id="workflow-play">Play actual receipt run</button>
+              <button class="demo-control" type="button" id="workflow-seal">Jump to seal</button>
+            </div>
+          </div>
+          <div class="workflow-metrics" aria-label="Backend workflow counters">
+            <div class="workflow-metric"><strong id="workflow-band-count">—</strong><span>Live Band messages</span></div>
+            <div class="workflow-metric"><strong id="workflow-gate-count">—</strong><span>Gate engine events</span></div>
+            <div class="workflow-metric"><strong id="workflow-context-count">—</strong><span>Context releases</span></div>
+            <div class="workflow-metric"><strong id="workflow-reviewer-count">—</strong><span>Reviewer deposits</span></div>
+            <div class="workflow-metric"><strong id="workflow-block-count">—</strong><span>Post-revocation blocks</span></div>
+          </div>
+          <div class="workflow-content">
+            <div>
+              <span class="kicker">Backend event stream</span>
+              <div id="workflow-event-stream" class="event-stream" aria-live="polite"></div>
+            </div>
+            <div class="object-card">
+              <h3>Receipt object</h3>
+              <pre id="workflow-object-detail">Loading receipt object…</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Backend showcase: ScopeGate did not just animate a button. The receipt shows <strong>Live Band messages</strong>, <strong>Gate engine</strong> decisions, <strong>Context releases</strong> as hashes/counts, <strong>Reviewer deposits</strong>, <strong>Post-revocation blocks</strong>, and the final browser-verifiable seal.</p>
+    </section>
 
     <section id="demo">
       <div class="section-head">
