@@ -1,0 +1,51 @@
+...............................s.s.s.........                            [100%]
+42 passed, 3 skipped in 0.38s
+PASS_DEMO_PROOF
+receipt_sha256=b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925
+PASS_ROOMKEY_PROOF
+mode=live_band_spear
+agents_named=true
+agent_trace_present=true
+agent_count=5
+band_message_ids_present=true
+band_message_count=25
+pre_grant_block=true
+naive_path_blocked=true
+scoped_release=true
+late_replay_recovered=false
+reviewer_deposits=3
+revocation=true
+post_revocation_block=true
+post_revocation_blocks=2
+raw_secret_canary_posted=false
+protected_payload_value_posted=false
+receipt_sha256=b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925
+seal_post_message_id=3a602d9e-2411-4fb4-944f-0fa094e6df71
+agent_trace.requester.name=Intake Requester
+agent_trace.requester.role=sensitive-context requester / naive baseline contrast
+agent_trace.requester.evidence=2e100e92-32fd-42ee-adad-e2e3fba28085,c0c9ca23-969c-4e31-8f1f-396e97d575c5
+agent_trace.reviewer_a.name=ReviewerA
+agent_trace.reviewer_a.role=scoped authority depositor
+agent_trace.reviewer_a.evidence=15393005-43f8-4ba6-a48a-59b0e15d548b
+agent_trace.reviewer_b.name=ReviewerB
+agent_trace.reviewer_b.role=scoped authority depositor
+agent_trace.reviewer_b.evidence=911b069a-70fd-4936-8906-2969fabfeb4e
+agent_trace.reviewer_c.name=ReviewerC
+agent_trace.reviewer_c.role=scoped authority depositor
+agent_trace.reviewer_c.evidence=2974e3d4-019e-4af0-9c1d-f3312e22f668
+agent_trace.auditor_gatekeeper.name=ScopeGate Auditor/Gatekeeper
+agent_trace.auditor_gatekeeper.role=enforces and verifies authority-before-disclosure
+agent_trace.auditor_gatekeeper.evidence=95886f17-744b-4440-8c4f-2e68a8da1b6f,ec5d0c8a-c164-4b0c-9e18-f903354d9c1b,01ef4362-69f4-49a5-81cd-f313df0cf01e,3a602d9e-2411-4fb4-944f-0fa094e6df71
+secret_scan_findings=[]
+finding_count=0
+integrity_check=PASS
+banned_claims=PASS
+site_check=PASS
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 -m pytest -q
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 -m roomkey.cli verify receipts/live-band-demo-20260618T185330Z.json
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 scripts/judge_proof.py receipts/live-band-demo-20260618T185330Z.json
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 scripts/secret_scan.py
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 scripts/integrity_check.py
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 scripts/site_check.py --banned-claims README.md docs site src tests scripts
+$ /home/exor/.hermes/hermes-agent/venv/bin/python3 scripts/site_check.py site/index.html site/evidence.json
+submit_check=PASS

@@ -1,0 +1,15 @@
+{
+  "case_id": "vendor-wire-001",
+  "safe_metadata": {
+    "case_type": "vendor_wire_review",
+    "vendor": "PUBLIC_SYNTHETIC_VENDOR",
+    "amount_band": "$10k-$25k"
+  },
+  "protected_payload": {
+    "policy_excerpt": "PUBLIC_SYNTHETIC_POLICY_EXCERPT_VALUE",
+    "invoice_summary": "PUBLIC_SYNTHETIC_INVOICE_SUMMARY_VALUE",
+    "risk_memo": "PUBLIC_SYNTHETIC_RISK_MEMO_VALUE",
+    "bank_account": "PUBLIC_SYNTHETIC_BANK_ACCOUNT_VALUE"
+  },
+  "secret_canary": "PUBLIC_SYNTHETIC_CANARY_VENDOR_WIRE"
+}

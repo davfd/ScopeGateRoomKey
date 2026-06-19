@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-06-18T18:56:14.718520+00:00",
+  "mode": "live_band_spear_external_seal_post",
+  "project": "RoomKey by ScopeGate",
+  "receipt_file_sha256": "f6d2d843c7523212797a1237675a3592c477c754d0af905df767ea3005fa3b81",
+  "receipt_path": "receipts/live-band-demo-20260618T185330Z.json",
+  "receipt_sha256": "b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925",
+  "room_id": "520468b9-1ce0-4b1b-a19a-a6b9192cf5ea",
+  "seal_message_content_sha256": "5ec34d470ed04dda711dc4305f7ed1b0492a2935ea591bc9ca8f7fe84ec743d5",
+  "seal_message_id": "3a602d9e-2411-4fb4-944f-0fa094e6df71",
+  "seal_message_status": 201
+}

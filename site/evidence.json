@@ -1,0 +1,217 @@
+{
+  "agent_trace": {
+    "auditor_gatekeeper": {
+      "band_actions": [
+        "demo.started",
+        "grant.requested",
+        "grant.granted",
+        "context.replay_blocked",
+        "grant.revoked",
+        "post-revocation blocks",
+        "receipt.sealed",
+        "external seal post"
+      ],
+      "band_handle": "RoomKey ScopeGate agent",
+      "evidence": [
+        "a70847ec-3316-4e5c-94dd-7f436fb6b095",
+        "7c805148-47d7-4dbf-8a29-7599ad61fc22",
+        "23bc60ba-dc3d-4ed7-bf0b-97179ebd1380",
+        "95886f17-744b-4440-8c4f-2e68a8da1b6f",
+        "ec5d0c8a-c164-4b0c-9e18-f903354d9c1b",
+        "705cae66-dec5-4ef0-b2c8-ccc7bc2c9f6c",
+        "2082eddc-531c-41a2-b95c-382f1806a29f",
+        "01ef4362-69f4-49a5-81cd-f313df0cf01e",
+        "3a602d9e-2411-4fb4-944f-0fa094e6df71"
+      ],
+      "name": "ScopeGate Auditor/Gatekeeper",
+      "role": "enforces and verifies authority-before-disclosure",
+      "scopegate_transition": "BLOCK -> GRANT_SCOPED -> REPLAY_BLOCKED -> REVOKED -> BLOCK -> SEALED"
+    },
+    "requester": {
+      "band_actions": [
+        "naive.baseline simulated without raw post",
+        "pre-grant action blocked"
+      ],
+      "band_handle": "Band room participant via live receipt (public handle redacted in repo)",
+      "evidence": [
+        "2e100e92-32fd-42ee-adad-e2e3fba28085",
+        "c0c9ca23-969c-4e31-8f1f-396e97d575c5"
+      ],
+      "name": "Intake Requester",
+      "role": "sensitive-context requester / naive baseline contrast",
+      "scopegate_transition": "NO_GRANT -> action.blocked"
+    },
+    "reviewer_a": {
+      "band_actions": [
+        "participant.added",
+        "context.released hash/count only",
+        "reviewer.deposit ALLOW"
+      ],
+      "band_handle": "ReviewerA synthetic role in live spear",
+      "evidence": [
+        "2ff1e92b-ed70-4c2d-b40c-f494fa53e4b7",
+        "3340d6e1-60b7-4c9a-9eaf-d707564433ef",
+        "15393005-43f8-4ba6-a48a-59b0e15d548b"
+      ],
+      "name": "ReviewerA",
+      "role": "scoped authority depositor",
+      "scopegate_transition": "GRANT_SCOPED -> reviewer.deposit"
+    },
+    "reviewer_b": {
+      "band_actions": [
+        "participant.added",
+        "context.released hash/count only",
+        "reviewer.deposit ALLOW"
+      ],
+      "band_handle": "ReviewerB synthetic role in live spear",
+      "evidence": [
+        "40a23e7b-5fe6-4f98-9b87-defda2d29ba9",
+        "ffcc898e-213b-4c63-8bbb-40f62697cb96",
+        "911b069a-70fd-4936-8906-2969fabfeb4e"
+      ],
+      "name": "ReviewerB",
+      "role": "scoped authority depositor",
+      "scopegate_transition": "GRANT_SCOPED -> reviewer.deposit"
+    },
+    "reviewer_c": {
+      "band_actions": [
+        "participant.added",
+        "context.released hash/count only",
+        "reviewer.deposit HUMAN_ESCALATE"
+      ],
+      "band_handle": "ReviewerC synthetic role in live spear",
+      "evidence": [
+        "b188af93-ffc0-4c50-b5a4-b54920bc949b",
+        "ce8a0be4-de7c-4d5a-9bec-87a3c3c4e80a",
+        "2974e3d4-019e-4af0-9c1d-f3312e22f668"
+      ],
+      "name": "ReviewerC",
+      "role": "scoped authority depositor",
+      "scopegate_transition": "GRANT_SCOPED -> reviewer.deposit"
+    }
+  },
+  "attack_survival": [
+    {
+      "attack": "pre-grant disclosure request",
+      "receipt_field": "pre_grant_block=true",
+      "result": "blocked before scoped grant"
+    },
+    {
+      "attack": "late participant replay",
+      "receipt_field": "late_replay_recovered=false",
+      "result": "blocked; recovered=false"
+    },
+    {
+      "attack": "receipt/root divergence",
+      "proof": "browser_verifier_contract_check=PASS on canonical roots",
+      "result": "browser and CLI fail closed"
+    },
+    {
+      "attack": "forged or resealed Band IDs",
+      "proof": "tests/test_redteam_hardening.py",
+      "result": "submit check fails closed in red-team tests"
+    },
+    {
+      "attack": "prompt-like public evidence text",
+      "proof": "proof/TEXT_INJECTION_MUTATION_RECEIPT.md",
+      "result": "inert; proof roots unchanged"
+    },
+    {
+      "attack": "production-security copy laundering",
+      "proof": "site_check --banned-claims",
+      "result": "blocked by banned-claim gate"
+    }
+  ],
+  "band_message_count": 25,
+  "canonical_receipt_sha256": "b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925",
+  "case_id": "vendor-wire-001",
+  "claim_boundary": "Band is the collaboration and witness surface; ScopeGate enforces authority-before-disclosure.",
+  "downloads": [
+    {
+      "href": "../proof/ROOMKEY_PROOF_PACK.md",
+      "label": "Proof pack markdown",
+      "sha256": "f7ba5141d390c9ae7ceb7b3e75ea465b5ba206565d5ff4920ca1f3e4c3215195"
+    },
+    {
+      "href": "../proof/ATTACK_MATRIX.json",
+      "label": "Attack matrix JSON",
+      "sha256": "e9b9792996397aeb2cf9b300e04ac06be6b9b292860f3b783f57e5577ddebe24"
+    },
+    {
+      "href": "../proof/USE_CASE_VENDOR_WIRE_APPROVAL.md",
+      "label": "Use case brief",
+      "sha256": "ae7d719689fdadbe35987a65df78a3d857f13726012972979c608213eb3a3eb9"
+    },
+    {
+      "href": "../proof/TEXT_INJECTION_MUTATION_RECEIPT.md",
+      "label": "Text-injection mutation receipt",
+      "sha256": "d379f3659d8dcc2d40338681b81b5b89db062004d725e49586e772cb1c279c5f"
+    },
+    {
+      "href": "../receipts/live-band-demo-20260618T185330Z.json",
+      "label": "Canonical receipt JSON",
+      "sha256": "f6d2d843c7523212797a1237675a3592c477c754d0af905df767ea3005fa3b81"
+    },
+    {
+      "hash_note": "self-referential evidence bundle; browser/CLI verifies its contract and linked hashed artifacts",
+      "href": "evidence.json",
+      "label": "Public evidence JSON",
+      "self_verifying": true
+    },
+    {
+      "href": "../docs/PUBLIC_SUBMIT_SEAL.md",
+      "label": "Public submit seal",
+      "sha256": "9336e4d872b7e872644af32b7885116a835d0d9b9235cb7d142429d62b432643"
+    }
+  ],
+  "first_band_message_id": "a70847ec-3316-4e5c-94dd-7f436fb6b095",
+  "last_receipt_event_message_id": "01ef4362-69f4-49a5-81cd-f313df0cf01e",
+  "live_receipt_file_sha256": "f6d2d843c7523212797a1237675a3592c477c754d0af905df767ea3005fa3b81",
+  "live_receipt_path": "receipts/live-band-demo-20260618T185330Z.json",
+  "mode": "live_band_spear",
+  "project": "RoomKey ScopeGate",
+  "proof": {
+    "agent_trace_present": true,
+    "agents_named": true,
+    "band_message_ids_present": true,
+    "late_replay_recovered": false,
+    "naive_path_blocked": true,
+    "post_revocation_block": true,
+    "post_revocation_blocks": 2,
+    "pre_grant_block": true,
+    "protected_payload_value_posted": false,
+    "raw_secret_canary_posted": false,
+    "reviewer_deposits": 3,
+    "revocation": true,
+    "scoped_release": true
+  },
+  "room_id": "520468b9-1ce0-4b1b-a19a-a6b9192cf5ea",
+  "seal_post_message_id": "3a602d9e-2411-4fb4-944f-0fa094e6df71",
+  "seal_post_status": 201,
+  "seal_receipt_path": "receipts/live-band-demo-20260618T185330Z-seal-post.json",
+  "use_case": {
+    "business_trigger": "A supplier asks to change payment instructions before a wire is released.",
+    "human_operator": "Finance lead grants a narrow case-scoped review instead of letting room prompts become authority.",
+    "title": "Vendor bank-change approval in a finance Band room",
+    "what_stays_private": [
+      "raw account/routing values",
+      "protected sample payload values",
+      "secret canary values"
+    ],
+    "what_the_room_sees": [
+      "case id",
+      "context key names",
+      "hash/count summaries",
+      "reviewer deposits",
+      "receipt/seal proof"
+    ],
+    "why_agents_use_it": [
+      "Requester needs a fast answer on whether the payment can move.",
+      "Evidence agent gathers invoice summary, vendor record, and policy excerpt without posting raw protected values.",
+      "Risk agent checks mismatch signals and prepares a safe summary for reviewers.",
+      "Reviewer agents deposit scoped allow/escalate decisions tied to the case.",
+      "Action agent can prepare the next step only after ScopeGate sees the matching grant."
+    ]
+  },
+  "winning_frame": "Give every agent room a disclosure gate."
+}

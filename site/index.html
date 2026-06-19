@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoomKey ScopeGate | Safe multi-agent rooms on Band</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050713;
+      --ink: #f8fafc;
+      --muted: #a8b3c7;
+      --soft: #dbeafe;
+      --panel: rgba(15, 23, 42, 0.78);
+      --panel-2: rgba(30, 41, 59, 0.58);
+      --line: rgba(148, 163, 184, 0.22);
+      --line-strong: rgba(103, 232, 249, 0.38);
+      --cyan: #67e8f9;
+      --blue: #60a5fa;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #fb7185;
+      --violet: #a78bfa;
+      --shadow: 0 28px 90px rgba(0,0,0,.42);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(103,232,249,.22), transparent 30rem),
+        radial-gradient(circle at 94% 8%, rgba(167,139,250,.18), transparent 34rem),
+        radial-gradient(circle at 48% 42%, rgba(52,211,153,.10), transparent 42rem),
+        linear-gradient(135deg, #050713 0%, #08111f 52%, #0b1020 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: 22px 0 58px; }
+    .nav { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; backdrop-filter: blur(16px); }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 950; letter-spacing: -.04em; }
+    .mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 14px; color: #04111f; background: linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow: 0 0 38px rgba(103,232,249,.32); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 8px; font-size: .9rem; }
+    .nav-links a { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(15,23,42,.56); text-decoration: none; color: #d6e3f5; }
+    .hero { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 34px; padding: clamp(26px, 5vw, 58px); background: linear-gradient(145deg, rgba(15,23,42,.96), rgba(8,13,28,.82)); box-shadow: var(--shadow); }
+    .hero::after { content:""; position:absolute; right:-180px; bottom:-240px; width:620px; height:620px; border-radius:999px; background:radial-gradient(circle, rgba(103,232,249,.18), transparent 66%); pointer-events:none; }
+    .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 28px; align-items: center; }
+    .eyebrow { display:inline-flex; align-items:center; gap:8px; width:fit-content; padding:7px 11px; border:1px solid rgba(52,211,153,.34); border-radius:999px; color:#c7f9df; background:rgba(6,78,59,.22); font-weight:900; font-size:.84rem; }
+    h1 { margin: 18px 0 16px; max-width: 860px; font-size: clamp(2.65rem, 6vw, 5.9rem); line-height: .92; letter-spacing: -.075em; }
+    .lead { margin:0; max-width: 780px; color:#dbeafe; font-size: clamp(1.08rem, 2vw, 1.32rem); }
+    .lead strong, strong { color:#fff; }
+    .plain { color: var(--muted); margin: 12px 0 0; max-width: 780px; }
+    .cta-row { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:14px; padding:12px 16px; text-decoration:none; font-weight:900; background:rgba(15,23,42,.72); color:var(--ink); }
+    .btn.primary { border:0; color:#04111f; background:linear-gradient(135deg, var(--cyan), var(--blue)); }
+    .verdict { border:1px solid rgba(52,211,153,.30); border-radius:28px; padding:20px; background:linear-gradient(180deg, rgba(6,78,59,.30), rgba(15,23,42,.78)); box-shadow:0 20px 70px rgba(0,0,0,.28); }
+    .verdict .big { display:block; margin: 8px 0 4px; color:#b9fbcf; font-size:clamp(3rem, 8vw, 5rem); font-weight:950; letter-spacing:-.08em; line-height:.9; }
+    .verdict h2 { margin: 0; letter-spacing:-.04em; }
+    .checks { display:grid; gap:9px; margin-top:16px; }
+    .check { display:flex; gap:9px; align-items:flex-start; color:#d8e6f7; font-size:.95rem; }
+    .check::before { content:""; flex:0 0 9px; width:9px; height:9px; margin-top:7px; border-radius:999px; background:var(--green); box-shadow:0 0 16px rgba(52,211,153,.52); }
+    .metrics { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .metric, .card, .artifact, .attack-card, .verify-card, .story-card { border:1px solid var(--line); border-radius:22px; background:var(--panel); padding:18px; backdrop-filter:blur(14px); }
+    .metric strong { display:block; font-size:clamp(1.7rem, 4vw, 2.45rem); line-height:1; letter-spacing:-.055em; }
+    .metric span { display:block; margin-top:8px; color:var(--muted); font-size:.9rem; }
+    section { margin-top: 30px; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:18px; margin:42px 0 16px; }
+    h2 { margin:0; font-size:clamp(1.55rem, 3vw, 2.4rem); letter-spacing:-.048em; }
+    h3 { margin:0 0 8px; }
+    .section-head p, .muted, .card p, .artifact p, .attack-card p, .verify-card p, .story-card p { color:var(--muted); margin:0; }
+    .kicker { color: var(--cyan); font-weight: 950; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem; }
+    .scenario { display:grid; grid-template-columns: .95fr 1.05fr; gap:14px; }
+    .story-card.big { padding:24px; background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(30,41,59,.56)); }
+    .before-after { display:grid; gap:12px; }
+    .before-after .story-card { min-height:112px; }
+    .label { display:inline-flex; width:fit-content; padding:6px 9px; border-radius:999px; border:1px solid var(--line); color:#bfdbfe; background:rgba(59,130,246,.12); font-weight:900; font-size:.78rem; margin-bottom:10px; }
+    .label.stop { color:#fecdd3; border-color:rgba(251,113,133,.32); background:rgba(244,63,94,.12); }
+    .label.go { color:#bbf7d0; border-color:rgba(52,211,153,.35); background:rgba(16,185,129,.12); }
+    .timeline { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; counter-reset: step; }
+    .step { position:relative; border:1px solid var(--line); border-radius:22px; padding:17px; background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.55)); min-height:160px; overflow:hidden; }
+    .step::before { counter-increment: step; content:counter(step); display:grid; place-items:center; width:34px; height:34px; border-radius:999px; background:rgba(103,232,249,.16); color:#a5f3fc; font-weight:950; margin-bottom:12px; }
+    .step strong { display:block; }
+    .step span { display:block; color:var(--muted); margin-top:5px; font-size:.94rem; }
+    .consent-strip { display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap:12px; align-items:stretch; margin-top:16px; }
+    .consent-state { border:1px solid var(--line); border-radius:22px; padding:17px; background:rgba(15,23,42,.72); }
+    .consent-state.locked { border-color:rgba(251,113,133,.36); background:linear-gradient(180deg, rgba(127,29,29,.22), rgba(15,23,42,.72)); }
+    .consent-state.granted { border-color:rgba(52,211,153,.42); background:linear-gradient(180deg, rgba(6,78,59,.30), rgba(15,23,42,.76)); }
+    .consent-state.sealed { border-color:rgba(103,232,249,.36); background:linear-gradient(180deg, rgba(14,116,144,.20), rgba(15,23,42,.74)); }
+    .consent-state .icon { display:inline-grid; place-items:center; width:36px; height:36px; margin-bottom:10px; border-radius:14px; background:rgba(148,163,184,.13); }
+    .consent-state strong { display:block; font-size:1.05rem; }
+    .consent-state span { display:block; color:var(--muted); margin-top:5px; font-size:.92rem; }
+    .consent-button { align-self:center; display:inline-flex; align-items:center; justify-content:center; min-width:132px; padding:12px 14px; border-radius:999px; color:#04111f; background:linear-gradient(135deg, var(--green), var(--cyan)); font-weight:950; box-shadow:0 0 30px rgba(52,211,153,.24); text-align:center; }
+    .consent-button.close { background:linear-gradient(135deg, var(--amber), var(--cyan)); }
+    .note { margin-top:12px; padding:13px 15px; border:1px dashed rgba(103,232,249,.35); border-radius:18px; background:rgba(14,165,233,.08); color:#dbeafe; }
+    .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
+    .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
+    .proof-groups { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .artifact { display:grid; gap:10px; }
+    .artifact-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+    .pill { display:inline-flex; width:fit-content; align-items:center; gap:6px; padding:6px 9px; border:1px solid rgba(52,211,153,.34); border-radius:999px; background:rgba(16,185,129,.13); color:#bbf7d0; font-weight:900; font-size:.78rem; }
+    .meta { color:#93a4ba; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.78rem; overflow-wrap:anywhere; }
+    .verify-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
+    .badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:7px 10px; font-weight:950; font-size:.82rem; background:rgba(148,163,184,.14); color:#dbe7f5; border:1px solid var(--line); }
+    .badge.pass { background:rgba(16,185,129,.14); color:#bbf7d0; border-color:rgba(52,211,153,.35); }
+    .badge.fail { background:rgba(244,63,94,.16); color:#fecdd3; border-color:rgba(251,113,133,.35); }
+    .verify-card { border-color: rgba(52,211,153,.36); background: linear-gradient(180deg, rgba(6,78,59,.24), rgba(15,23,42,.82)); box-shadow: 0 18px 55px rgba(0,0,0,.22); }
+    .verify-card h3 { margin-top: 14px; font-size: 1.18rem; }
+    .plain-list { margin:12px 0 0; padding:0; list-style:none; display:grid; gap:9px; color:#dbeafe; }
+    .plain-list li { padding-left:22px; position:relative; }
+    .plain-list li::before { content:"✓"; position:absolute; left:0; color:var(--green); font-weight:950; }
+    .attack-grid { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; }
+    .attack-card { min-height:170px; }
+    .status { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:6px 9px; font-weight:950; font-size:.78rem; background:rgba(16,185,129,.14); color:#bbf7d0; border:1px solid rgba(52,211,153,.35); margin-bottom:12px; }
+    .status.failclosed { background:rgba(251,191,36,.12); color:#fde68a; border-color:rgba(251,191,36,.35); }
+    details { border:1px solid var(--line); border-radius:22px; background:rgba(2,6,23,.78); padding:16px 18px; }
+    summary { cursor:pointer; font-weight:950; color:#e0f2fe; }
+    pre { white-space:pre-wrap; overflow:auto; margin:14px 0 0; padding:16px; border-radius:16px; background:#020617; color:#c7d2fe; font-size:.82rem; max-height:420px; }
+    .boundary { border:1px solid rgba(251,191,36,.30); border-radius:24px; padding:18px; background:rgba(120,53,15,.16); }
+    .footer { margin-top:34px; color:var(--muted); font-size:.9rem; }
+    @media (max-width: 980px) {
+      .hero-grid, .metrics, .scenario, .timeline, .consent-strip, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
+      .nav { align-items:flex-start; flex-direction:column; }
+      h1 { letter-spacing:-.06em; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav" aria-label="RoomKey navigation">
+      <div class="brand"><div class="mark">RK</div><span>RoomKey ScopeGate</span></div>
+      <div class="nav-links">
+        <a href="#story">Why it matters</a>
+        <a href="#demo">Demo</a>
+        <a href="#proof">Proof</a>
+        <a href="#verify">Verify it</a>
+        <a href="#attacks">Attacks</a>
+        <a href="../README.md">README</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Receipt-pinned Band demo · browser verification</span>
+          <h1>Give every agent room a disclosure gate.</h1>
+          <p class="lead">Agent rooms make multi-agent work fast. In regulated work, speed is not enough: <strong>a room is not permission to reveal sensitive context.</strong> RoomKey makes disclosure wait for a narrow human grant, then leaves a receipt a judge can check.</p>
+          <p class="plain">This supplier bank-change run proves the bounded result: protected values did not enter shared Band history, late replay stayed blocked, and the site receipt still matches the sealed receipt.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="#verify">Verify it yourself</a>
+            <a class="btn" href="#demo">Watch the flow</a>
+            <a class="btn" href="#proof">Download receipts</a>
+          </div>
+        </div>
+        <aside class="verdict" aria-label="Proof summary">
+          <h2>Current run</h2>
+          <span class="big" id="hero-status">Checking</span>
+          <p id="hero-status-copy">Fresh browser checks are running on this page. They verify that the public files, receipt copy, and pinned hashes still agree for this prototype run.</p>
+          <div class="checks">
+            <span class="check">5 agents traced in the receipt.</span>
+            <span class="check">25 Band message IDs witnessed.</span>
+            <span class="check">0 protected payload values found in shared room history.</span>
+            <span class="check">Revoked access and late replay stayed blocked.</span>
+          </div>
+        </aside>
+      </div>
+      <div class="metrics" aria-label="Live proof metrics">
+        <div class="metric"><strong id="agent-count">5</strong><span>agents in trace</span></div>
+        <div class="metric"><strong id="band-count">25</strong><span>Band messages witnessed</span></div>
+        <div class="metric"><strong id="secret-status">0</strong><span>protected values posted</span></div>
+        <div class="metric"><strong id="replay-status">Checking</strong><span>late replay blocked</span></div>
+      </div>
+    </header>
+
+    <section id="demo">
+      <div class="section-head">
+        <h2>The five moves</h2>
+        <p>Read this once and the whole demo should make sense.</p>
+      </div>
+      <div class="timeline">
+        <div class="step"><strong>Agent asks</strong><span>A supplier bank-change review needs evidence, risk, reviewers, and action in one Band room.</span></div>
+        <div class="step"><strong>Gate blocks</strong><span>No approval means no raw banking values in shared room history. The room can still discuss safe labels and hashes.</span></div>
+        <div class="step"><strong>Human grants scope</strong><span>The finance lead approves this case, these agents, and these safe fields for today.</span></div>
+        <div class="step"><strong>Safe collaboration</strong><span>Agents review summaries, hashes, policy excerpts, and reviewer decisions without exposing protected values.</span></div>
+        <div class="step"><strong>Revoke + seal</strong><span>The key stops working. Late replay stays blocked. The receipt records what happened.</span></div>
+      </div>
+      <div class="consent-strip" aria-label="Scope grant state transition">
+        <div class="consent-state locked"><span class="icon">🔒</span><strong>Blocked</strong><span>No grant: protected banking values cannot enter shared Band history.</span></div>
+        <div class="consent-button">Grant Scope</div>
+        <div class="consent-state granted"><span class="icon">🗝️</span><strong>Scoped collaboration</strong><span>Human approves this case, these agents, and these safe fields for today.</span></div>
+        <div class="consent-button close">Revoke</div>
+        <div class="consent-state sealed"><span class="icon">🧾</span><strong>Revoked + Sealed</strong><span>The key closes, replay stays blocked, and the receipt records the run.</span></div>
+      </div>
+      <p class="note">The thing to remember: this run showed collaboration without disclosure. Protected values did not enter shared Band history, replay stayed blocked, and the receipt still matches.</p>
+    </section>
+
+    <section id="story">
+      <div class="section-head">
+        <h2>Why a room needs a key</h2>
+        <p>A shared room coordinates work. It should not become a permission boundary by accident.</p>
+      </div>
+      <div class="scenario">
+        <article class="story-card big">
+          <span class="kicker">The moment</span>
+          <h3>A supplier wants to change where money gets sent.</h3>
+          <p>Finance wants help from an evidence agent, a risk agent, reviewers, and an action agent. That is good room work. It is also exactly where raw bank details should stay scoped.</p>
+        </article>
+        <div class="before-after">
+          <article class="story-card"><span class="label stop">Without RoomKey</span><h3>The room becomes authority by accident.</h3><p>An agent asks, another agent shares, and the transcript may now hold material that should have stayed scoped.</p></article>
+          <article class="story-card"><span class="label go">With RoomKey</span><h3>The human grant becomes the key.</h3><p>The room discusses safe summaries first. Sensitive context waits for scoped approval. The run ends with a receipt a judge can check.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="human">
+      <div class="section-head">
+        <h2>How it feels to use</h2>
+        <p>It should feel like approving a risky operation, not editing a schema.</p>
+      </div>
+      <div class="grid-2">
+        <article class="card"><span class="label stop">Before approval</span><h3>ScopeGate says no.</h3><p>“I can help with the review, but I need approval for this case before sensitive banking context can be released.”</p></article>
+        <article class="card"><span class="label go">Human approval</span><h3>The manager says yes, narrowly.</h3><p>“Approve this supplier review for today. Let the evidence, risk, reviewer, and action agents use the invoice summary, vendor record hash, policy excerpt, and risk memo. Do not post raw account details.”</p></article>
+        <article class="card"><span class="label go">During review</span><h3>Agents can work.</h3><p>The room sees safe summaries, hashes, decisions, and gate state. Sensitive values stay out of the shared transcript.</p></article>
+        <article class="card"><span class="label stop">After revocation</span><h3>The key stops working.</h3><p>Late replay does not recover protected context. The run is sealed for audit.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Where this fits</h2>
+        <p>RoomKey is reusable. The supplier review is just the first visible case.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card"><h3>Finance</h3><p>Vendor bank changes, payment approvals, procurement exceptions, invoice disputes.</p></article>
+        <article class="card"><h3>Healthcare</h3><p>Case review where agents can collaborate without putting patient details into broad room history.</p></article>
+        <article class="card"><h3>Legal and compliance</h3><p>Document triage, incident response, policy review, or investigations where access needs a receipt.</p></article>
+      </div>
+    </section>
+
+    <section id="verify">
+      <div class="section-head">
+        <h2>What can you verify yourself?</h2>
+        <p>The green badges are not screenshots. Your browser checks the files from this page every time it loads.</p>
+      </div>
+      <div class="verify-grid">
+        <article class="verify-card"><span id="contract-badge" class="badge">Checking…</span><h3>The public bundle is intact</h3><p>The evidence file has the use case, agent trace, attack results, download list, proof flags, and seal ID.</p><ul class="plain-list"><li id="download-check">Download hashes are being checked.</li><li id="proof-check">Proof flags are being checked.</li></ul></article>
+        <article class="verify-card"><span id="schema-badge" class="badge">Checking…</span><h3>The receipt has the right shape</h3><p>The browser checks for Band message IDs, gate events, reviewer deposits, revocation, and secret-scan fields.</p><ul class="plain-list"><li id="secrets-check">Protected values are being checked.</li><li id="replay-check">Late replay is being checked.</li></ul></article>
+        <article class="verify-card"><span id="hash-badge" class="badge">Checking…</span><h3>The receipt was not swapped</h3><p>The receipt inside the site must match the canonical receipt and the pinned hash.</p><p class="meta" id="receipt-hash-short">loading…</p></article>
+      </div>
+      <div class="note">
+        Want to check deeper? Clone the repo and run <span class="meta">python scripts/submit_check.py</span>. That runs the stricter CLI gate, full tests, schema checks, integrity checks, banned-copy checks, and the browser verifier harness.
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <article class="card">
+          <span class="kicker">Decode the receipt</span>
+          <h3>What am I actually checking?</h3>
+          <p>The headline tells you the claim. The hashes tell you whether the receipt you downloaded is the same receipt the page claims. The secret-scan flags tell you whether protected values showed up in shared room history in this run.</p>
+        </article>
+        <article class="card">
+          <span class="kicker">Plain audit</span>
+          <h3>What should match?</h3>
+          <p><span class="meta">canonical_receipt_sha256</span> should match <span class="meta">browser_receipt_hash</span>. <span class="meta">live_receipt_file_sha256</span> should match <span class="meta">browser_receipt_file_hash</span>. Protected-value flags should stay <span class="meta">false</span>.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="proof">
+      <div class="section-head">
+        <h2>Proof you can download</h2>
+        <p>Judges can read the short proof path. Auditors can pull the receipt and manifest.</p>
+      </div>
+      <div class="proof-groups">
+        <div>
+          <span class="kicker">For judges</span>
+          <div class="grid-2" style="margin-top:12px">
+            <article class="artifact"><div class="artifact-row"><h3>Proof pack</h3><span class="pill">Hash-pinned</span></div><p>The short story: problem, run, attacks survived, boundary.</p><span class="meta">2.6 KB · f7ba5141…215195</span><a class="btn" download href="../proof/ROOMKEY_PROOF_PACK.md">Download proof pack</a></article>
+            <article class="artifact"><div class="artifact-row"><h3>Use-case brief</h3><span class="pill">Hash-pinned</span></div><p>The supplier bank-change scenario in plain English.</p><span class="meta">1.3 KB · ae7d7196…3a3eb9</span><a class="btn" download href="../proof/USE_CASE_VENDOR_WIRE_APPROVAL.md">Download use case</a></article>
+            <article class="artifact"><div class="artifact-row"><h3>Attack matrix</h3><span class="pill">Hash-pinned</span></div><p>The attacks we ran and what failed closed.</p><span class="meta">1.5 KB · e9b97929…debe24</span><a class="btn" download href="../proof/ATTACK_MATRIX.json">Download attack matrix</a></article>
+          </div>
+        </div>
+        <div>
+          <span class="kicker">For auditors</span>
+          <div class="grid-2" style="margin-top:12px">
+            <article class="artifact"><div class="artifact-row"><h3>Receipt JSON</h3><span class="pill">Hash-pinned</span></div><p>The canonical proof root for this run.</p><span class="meta">47.2 KB · f6d2d843…fa3b81</span><a class="btn" download href="../receipts/live-band-demo-20260618T185330Z.json">Download receipt JSON</a></article>
+            <article class="artifact"><div class="artifact-row"><h3>Mutation receipt</h3><span class="pill">Hash-pinned</span></div><p>Shows hostile prompt-like text stayed inert.</p><span class="meta">1.7 KB · d379f365…279c5f</span><a class="btn" download href="../proof/TEXT_INJECTION_MUTATION_RECEIPT.md">Download mutation receipt</a></article>
+            <article class="artifact"><div class="artifact-row"><h3>Evidence manifest</h3><span class="pill">Self-checking</span></div><p>Public bundle tying the page to receipts and downloads.</p><span class="meta">7.9 KB · 1ac4f1c0…04d666</span><a class="btn" download href="evidence.json">Download evidence JSON</a></article>
+            <article class="artifact"><div class="artifact-row"><h3>Submit seal</h3><span class="pill">Hash-pinned</span></div><p>Deployment/readback status and receipt hashes.</p><span class="meta">1.7 KB · 9336e4d8…432643</span><a class="btn" download href="../docs/PUBLIC_SUBMIT_SEAL.md">Download seal</a></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="attacks">
+      <div class="section-head">
+        <h2>Attack resistance proven in this run</h2>
+        <p>The point is not that nothing can ever break. The point is that the obvious ways to fake the proof failed closed in this package.</p>
+      </div>
+      <div class="attack-grid">
+        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Receipt divergence</h3><p>Change the receipt root or file hash and the verifier goes red.</p></article>
+        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Schema corruption</h3><p>Malformed receipt/public proof files fail before submit.</p></article>
+        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Forged Band IDs</h3><p>Placeholder or forged-looking message IDs do not pass the local submit gate.</p></article>
+        <article class="attack-card"><span class="status">INERT</span><h3>Prompt-like text</h3><p>Hostile text in public evidence fields does not become authority.</p></article>
+        <article class="attack-card"><span class="status failclosed">BLOCKED</span><h3>Overclaim copy</h3><p>Public text that claims more than the prototype proved is blocked.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <details>
+        <summary>Auditor details: raw verifier lines</summary>
+        <p class="muted" style="margin-top:10px">These are the machine receipts behind the green cards above. You do not need them to understand the demo; they are here so the proof can be checked rather than trusted.</p>
+        <pre id="verification">Loading verifier…</pre>
+      </details>
+    </section>
+
+    <section class="boundary">
+      <h2>Boundary</h2>
+      <p class="muted">This proves a receipt-pinned prototype run and the local attack-resistance checks for this package. It does not prove production security, independent Band-side security, or exhaustive future deployment safety.</p>
+    </section>
+
+    <p class="footer">Seal post: <span class="meta" id="seal-id">loading…</span> · Last browser check: <span id="last-updated">loading…</span></p>
+  </main>
+  <script src="verifier.js"></script>
+</body>
+</html>

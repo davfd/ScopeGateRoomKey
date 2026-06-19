@@ -1,0 +1,34 @@
+{
+  "files": [
+    {
+      "path": "proof/ROOMKEY_PROOF_PACK.md",
+      "sha256": "f7ba5141d390c9ae7ceb7b3e75ea465b5ba206565d5ff4920ca1f3e4c3215195"
+    },
+    {
+      "path": "proof/ATTACK_MATRIX.json",
+      "sha256": "e9b9792996397aeb2cf9b300e04ac06be6b9b292860f3b783f57e5577ddebe24"
+    },
+    {
+      "path": "proof/USE_CASE_VENDOR_WIRE_APPROVAL.md",
+      "sha256": "ae7d719689fdadbe35987a65df78a3d857f13726012972979c608213eb3a3eb9"
+    },
+    {
+      "path": "proof/TEXT_INJECTION_MUTATION_RECEIPT.md",
+      "sha256": "d379f3659d8dcc2d40338681b81b5b89db062004d725e49586e772cb1c279c5f"
+    },
+    {
+      "path": "receipts/live-band-demo-20260618T185330Z.json",
+      "sha256": "f6d2d843c7523212797a1237675a3592c477c754d0af905df767ea3005fa3b81"
+    },
+    {
+      "hash_note": "self-referential evidence bundle; browser/CLI verifies its contract and linked hashed artifacts",
+      "path": "site/evidence.json",
+      "self_verifying": true
+    },
+    {
+      "path": "docs/PUBLIC_SUBMIT_SEAL.md",
+      "sha256": "9336e4d872b7e872644af32b7885116a835d0d9b9235cb7d142429d62b432643"
+    }
+  ],
+  "title": "RoomKey downloadable proof pack"
+}

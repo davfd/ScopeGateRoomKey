@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RoomKey public proof bundle",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "winning_frame",
+    "canonical_receipt_sha256",
+    "live_receipt_file_sha256",
+    "seal_post_message_id",
+    "agent_trace",
+    "proof",
+    "use_case",
+    "attack_survival",
+    "downloads"
+  ],
+  "properties": {
+    "winning_frame": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_receipt_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "live_receipt_file_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "seal_post_message_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_trace": {
+      "type": "object",
+      "minProperties": 3
+    },
+    "proof": {
+      "type": "object",
+      "required": [
+        "agents_named",
+        "agent_trace_present",
+        "band_message_ids_present",
+        "naive_path_blocked",
+        "late_replay_recovered",
+        "reviewer_deposits",
+        "revocation",
+        "post_revocation_block",
+        "raw_secret_canary_posted",
+        "protected_payload_value_posted"
+      ],
+      "properties": {
+        "agents_named": {
+          "const": true
+        },
+        "agent_trace_present": {
+          "const": true
+        },
+        "band_message_ids_present": {
+          "const": true
+        },
+        "naive_path_blocked": {
+          "const": true
+        },
+        "late_replay_recovered": {
+          "const": false
+        },
+        "reviewer_deposits": {
+          "type": "integer",
+          "minimum": 3
+        },
+        "revocation": {
+          "const": true
+        },
+        "post_revocation_block": {
+          "const": true
+        },
+        "raw_secret_canary_posted": {
+          "const": false
+        },
+        "protected_payload_value_posted": {
+          "const": false
+        }
+      }
+    },
+    "use_case": {
+      "type": "object",
+      "required": [
+        "title",
+        "business_trigger",
+        "why_agents_use_it",
+        "what_stays_private",
+        "what_the_room_sees",
+        "human_operator"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "business_trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "human_operator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why_agents_use_it": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "what_stays_private": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "what_the_room_sees": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "attack_survival": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "attack",
+          "result"
+        ],
+        "properties": {
+          "attack": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof": {
+            "type": "string"
+          },
+          "receipt_field": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "downloads": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "href",
+          "label"
+        ],
+        "properties": {
+          "href": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "self_verifying": {
+            "type": "boolean"
+          },
+          "hash_note": {
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "sha256"
+            ]
+          },
+          {
+            "properties": {
+              "self_verifying": {
+                "const": true
+              }
+            },
+            "required": [
+              "self_verifying"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+[project]
+name = "roomkey-scopegate"
+version = "0.1.0"
+description = "RoomKey by ScopeGate local proof harness for Band rooms."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["jsonschema>=4.0"]
+
+[project.scripts]
+roomkey = "roomkey.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/roomkey"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,42 @@
+{
+  "attacks": [
+    {
+      "attack": "pre-grant disclosure request",
+      "receipt_field": "pre_grant_block=true",
+      "result": "blocked before scoped grant"
+    },
+    {
+      "attack": "late participant replay",
+      "receipt_field": "late_replay_recovered=false",
+      "result": "blocked; recovered=false"
+    },
+    {
+      "attack": "receipt/root divergence",
+      "proof": "browser_verifier_contract_check=PASS on canonical roots",
+      "result": "browser and CLI fail closed"
+    },
+    {
+      "attack": "forged or resealed Band IDs",
+      "proof": "tests/test_redteam_hardening.py",
+      "result": "submit check fails closed in red-team tests"
+    },
+    {
+      "attack": "prompt-like public evidence text",
+      "proof": "proof/TEXT_INJECTION_MUTATION_RECEIPT.md",
+      "result": "inert; proof roots unchanged"
+    },
+    {
+      "attack": "production-security copy laundering",
+      "proof": "site_check --banned-claims",
+      "result": "blocked by banned-claim gate"
+    }
+  ],
+  "case_id": "vendor-wire-001",
+  "independent_band_side_audit_proven": false,
+  "production_security_proven": false,
+  "project": "RoomKey ScopeGate",
+  "receipt_file_sha256": "f6d2d843c7523212797a1237675a3592c477c754d0af905df767ea3005fa3b81",
+  "receipt_sha256": "b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925",
+  "scope": "receipt-pinned prototype run",
+  "seal_post_message_id": "3a602d9e-2411-4fb4-944f-0fa094e6df71"
+}

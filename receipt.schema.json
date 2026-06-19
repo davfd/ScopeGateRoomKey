@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RoomKey live Band spear receipt",
+  "type": "object",
+  "required": [
+    "project",
+    "mode",
+    "room_id",
+    "case_id",
+    "grant",
+    "grant_id",
+    "receipt_sha256",
+    "band_message_ids",
+    "live_gate_events",
+    "blocked_attempts",
+    "context_releases",
+    "late_participant_probes",
+    "reviewer_deposits",
+    "revocations",
+    "post_revocation_blocks",
+    "naive_baseline",
+    "band_secret_scan",
+    "naive_leak_radius",
+    "hardened_leak_radius",
+    "transcript_sha256",
+    "policy_log_sha256"
+  ],
+  "properties": {
+    "project": {"type": "string", "minLength": 1},
+    "mode": {"const": "live_band_spear"},
+    "room_id": {"type": "string", "minLength": 1},
+    "case_id": {"type": "string", "minLength": 1},
+    "grant_id": {"type": "string", "minLength": 1},
+    "grant": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "room_id",
+        "grant_id",
+        "purpose",
+        "allowed_agents",
+        "allowed_context_keys",
+        "allowed_action_kinds",
+        "expires_at",
+        "human_approver",
+        "state"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "room_id": {"type": "string", "minLength": 1},
+        "grant_id": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "allowed_agents": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "allowed_context_keys": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "allowed_action_kinds": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "expires_at": {"type": "string", "minLength": 1},
+        "human_approver": {"type": "string", "minLength": 1},
+        "state": {"type": "string", "minLength": 1}
+      }
+    },
+    "receipt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "band_message_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "live_gate_events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "actor", "band_message_id", "band_ok", "band_content_sha256"],
+        "properties": {
+          "type": {"type": "string", "minLength": 1},
+          "actor": {"type": "string", "minLength": 1},
+          "band_message_id": {"type": "string", "minLength": 1},
+          "band_ok": {"const": true},
+          "band_content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "blocked_attempts": {"type": "array", "minItems": 1},
+    "context_releases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["agent", "case_id", "context_key", "raw_value_posted_to_band"],
+        "properties": {
+          "agent": {"type": "string", "minLength": 1},
+          "case_id": {"type": "string", "minLength": 1},
+          "context_key": {"type": "string", "minLength": 1},
+          "raw_value_posted_to_band": {"const": false}
+        }
+      }
+    },
+    "late_participant_probes": {"type": "array", "minItems": 1},
+    "reviewer_deposits": {"type": "array", "minItems": 3},
+    "revocations": {"type": "array", "minItems": 1},
+    "post_revocation_blocks": {"type": "array", "minItems": 1},
+    "band_secret_scan": {
+      "type": "object",
+      "required": ["raw_secret_canary_posted", "protected_payload_value_posted"],
+      "properties": {
+        "raw_secret_canary_posted": {"const": false},
+        "protected_payload_value_posted": {"const": false}
+      }
+    },
+    "naive_leak_radius": {"type": "number"},
+    "hardened_leak_radius": {"type": "number"}
+  }
+}
