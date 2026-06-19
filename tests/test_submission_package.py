@@ -58,37 +58,37 @@ def test_site_evidence_is_machine_readable_and_matches_receipt():
     assert evidence['proof']['protected_payload_value_posted'] is False
     assert len(evidence['agent_trace']) >= 3
 
-def test_site_browser_verifier_wording_matches_proof_surface():
+def test_site_browser_verifier_wording_matches_console_surface():
     html = (ROOT / 'site' / 'index.html').read_text(encoding='utf-8')
     verifier = (ROOT / 'site' / 'verifier.js').read_text(encoding='utf-8')
     evidence_contract = (ROOT / 'docs' / 'EVIDENCE_CONTRACT.md').read_text(encoding='utf-8')
 
     assert 'Live Band receipt verified in ' + 'browser' not in html
     assert '<h3>Receipt ' + 'schema</h3>' not in html
-    assert 'Give every agent room a disclosure gate.' in html
-    assert 'protected values did not enter shared Band history' in html
-    assert 'The five moves' in html
-    assert 'Human grants scope' in html
-    assert 'Start request' in html
-    assert 'Grant Scope' in html
-    assert 'Run scoped review' in html
-    assert 'Revoke key' in html
-    assert 'Try late replay' in html
-    assert 'Seal receipt' in html
-    assert 'id="demo-transcript"' in html
-    assert 'data-action="grant"' in html
-    assert 'data-action="late-replay"' in html
-    assert 'Scoped collaboration' in html
-    assert 'Revoked + Sealed' in html
-    assert 'What can you verify yourself?' in html
-    assert 'The receipt was not swapped' in html
-    assert 'Auditor details: raw verifier lines' in html
+    assert 'Console receipt run' in html
+    assert 'Run console demo' in html
+    assert 'roomkey scopegate run --case VENDOR-WIRE-1849 --band live' in html
+    assert 'roomkey verify receipts/live-band-demo-20260618T185330Z.json' in html
+    assert 'id="console-lines"' in html
+    assert 'id="console-run"' in html
+    assert 'id="console-jump-pass"' in html
+    assert 'pre-grant BLOCK' in html
+    assert 'human grant' in html
+    assert 'late replay BLOCKED' in html
+    assert 'Download proof pack' in html
+    assert 'receipt-pinned prototype run' in html
+    for removed in [
+        'Actual backend workflow', 'Try the gate', 'The five moves', 'How it feels to use',
+        'Where this fits', 'Attack resistance proven in this run', 'id="demo-transcript"',
+        'id="workflow-stage-list"',
+    ]:
+        assert removed not in html
 
     assert "fetchText('../receipts/live-band-demo-20260618T185330Z.json')" in verifier
-    assert 'initScopeGateDemo' in verifier
-    assert 'handleScopeGateDemoAction' in verifier
-    assert 'late-replay' in verifier
-    assert 'Protected values stay at 0' in verifier
+    assert 'initConsoleDemo' in verifier
+    assert 'renderConsoleReceiptRun' in verifier
+    assert 'console-lines' in verifier
+    assert 'late replay BLOCKED' in verifier
     assert 'evidence.canonical_receipt_sha256 === actual' in verifier
     assert 'evidence.live_receipt_file_sha256 === siteFileHash' in verifier
     assert 'evidence.live_receipt_file_sha256 === canonicalFileHash' in verifier
@@ -139,36 +139,40 @@ def test_browser_receipt_contract_harness_fails_on_divergent_site_receipt(tmp_pa
     assert 'browser_site_canonical_receipt_match=FAIL' in negative.stdout
 
 
-def test_site_exposes_actual_backend_workflow_not_toy_gate_only():
+def test_site_exposes_single_console_demo_not_crowded_brochure():
     html = (ROOT / 'site' / 'index.html').read_text(encoding='utf-8')
     verifier = (ROOT / 'site' / 'verifier.js').read_text(encoding='utf-8')
 
     for needle in [
-        'Actual backend workflow',
-        'Play actual receipt run',
-        'Backend event stream',
-        'Live Band messages',
-        'Gate engine',
-        'Context releases',
-        'Reviewer deposits',
-        'Post-revocation blocks',
-        'id="workflow-stage-list"',
-        'id="workflow-event-stream"',
-        'id="workflow-object-detail"',
+        'Console receipt run',
+        'One screen. Commands, gate output, receipt PASS.',
+        'Run console demo',
+        'Jump to final PASS',
+        '$ roomkey scopegate run --case VENDOR-WIRE-1849 --band live',
+        '$ roomkey verify receipts/live-band-demo-20260618T185330Z.json',
+        'pre-grant BLOCK',
+        'late replay BLOCKED',
+        'receipt sealed',
+        'id="console-lines"',
+        'id="verification"',
     ]:
         assert needle in html
 
     for needle in [
-        'buildBackendWorkflow',
-        'renderBackendWorkflow',
-        'playActualReceiptRun',
-        'review_gate.adjudicated',
-        'context.replay_blocked',
-        'receipt.sealed',
-        'workflow-event-stream',
-        'workflow-object-detail',
+        'renderConsoleReceiptRun',
+        'initConsoleDemo',
+        'console-jump-pass',
+        'reviewer deposits',
+        'context releases',
+        'receipt sealed',
     ]:
         assert needle in verifier
+
+    for removed in [
+        'workflow-console', 'interactive-demo', 'story-card', 'attack-grid',
+        'Play actual receipt run', 'Grant Scope', 'Run scoped review',
+    ]:
+        assert removed not in html
 
 
 def test_public_copy_rule_map_and_banned_claims():
@@ -177,10 +181,10 @@ def test_public_copy_rule_map_and_banned_claims():
         for path in [ROOT / 'README.md', *sorted((ROOT / 'docs').glob('*.md')), ROOT / 'site' / 'index.html', *sorted((ROOT / 'proof').glob('*'))]
     )
     for required in [
-        'Give every agent room a disclosure gate.',
+        'Console receipt run',
         'protected values did not appear in shared Band history in this run',
         'authority-before-disclosure', '3+ agents', 'official Band Agent API',
-        'supplier bank-change review', 'Download proof pack', 'Attack resistance proven in this run',
+        'supplier bank-change review', 'Download proof pack', 'receipt-pinned prototype run',
     ]:
         assert required in combined
     for removed in ['old comparison matrix', 'external-work superiority section', 'Other Band projects make agents ' + 'collaborate', 'not another workflow ' + 'room']:

@@ -3,446 +3,172 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RoomKey ScopeGate | Safe multi-agent rooms on Band</title>
+  <title>RoomKey ScopeGate | Console receipt run</title>
   <style>
     :root {
       color-scheme: dark;
-      --bg: #050713;
-      --ink: #f8fafc;
-      --muted: #a8b3c7;
-      --soft: #dbeafe;
-      --panel: rgba(15, 23, 42, 0.78);
-      --panel-2: rgba(30, 41, 59, 0.58);
-      --line: rgba(148, 163, 184, 0.22);
-      --line-strong: rgba(103, 232, 249, 0.38);
+      --bg: #05070d;
+      --panel: #0a0f1d;
+      --panel-2: #101827;
+      --line: #253247;
+      --ink: #edf7ff;
+      --muted: #9fb0c7;
+      --green: #45f5a2;
       --cyan: #67e8f9;
-      --blue: #60a5fa;
-      --green: #34d399;
       --amber: #fbbf24;
       --red: #fb7185;
-      --violet: #a78bfa;
-      --shadow: 0 28px 90px rgba(0,0,0,.42);
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      min-height: 100vh;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 8% 0%, rgba(103,232,249,.22), transparent 30rem),
-        radial-gradient(circle at 94% 8%, rgba(167,139,250,.18), transparent 34rem),
-        radial-gradient(circle at 48% 42%, rgba(52,211,153,.10), transparent 42rem),
-        linear-gradient(135deg, #050713 0%, #08111f 52%, #0b1020 100%);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.5;
+      background: radial-gradient(circle at 12% 0%, rgba(103,232,249,.13), transparent 28rem), var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
     }
     a { color: inherit; }
-    .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: 22px 0 58px; }
-    .nav { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; backdrop-filter: blur(16px); }
-    .brand { display: flex; align-items: center; gap: 11px; font-weight: 950; letter-spacing: -.04em; }
-    .mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 14px; color: #04111f; background: linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow: 0 0 38px rgba(103,232,249,.32); }
-    .nav-links { display: flex; flex-wrap: wrap; gap: 8px; font-size: .9rem; }
-    .nav-links a { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(15,23,42,.56); text-decoration: none; color: #d6e3f5; }
-    .hero { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 34px; padding: clamp(26px, 5vw, 58px); background: linear-gradient(145deg, rgba(15,23,42,.96), rgba(8,13,28,.82)); box-shadow: var(--shadow); }
-    .hero::after { content:""; position:absolute; right:-180px; bottom:-240px; width:620px; height:620px; border-radius:999px; background:radial-gradient(circle, rgba(103,232,249,.18), transparent 66%); pointer-events:none; }
-    .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 28px; align-items: center; }
-    .eyebrow { display:inline-flex; align-items:center; gap:8px; width:fit-content; padding:7px 11px; border:1px solid rgba(52,211,153,.34); border-radius:999px; color:#c7f9df; background:rgba(6,78,59,.22); font-weight:900; font-size:.84rem; }
-    h1 { margin: 18px 0 16px; max-width: 860px; font-size: clamp(2.65rem, 6vw, 5.9rem); line-height: .92; letter-spacing: -.075em; }
-    .lead { margin:0; max-width: 780px; color:#dbeafe; font-size: clamp(1.08rem, 2vw, 1.32rem); }
-    .lead strong, strong { color:#fff; }
-    .plain { color: var(--muted); margin: 12px 0 0; max-width: 780px; }
-    .cta-row { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
-    .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:14px; padding:12px 16px; text-decoration:none; font-weight:900; background:rgba(15,23,42,.72); color:var(--ink); }
-    .btn.primary { border:0; color:#04111f; background:linear-gradient(135deg, var(--cyan), var(--blue)); }
-    .verdict { border:1px solid rgba(52,211,153,.30); border-radius:28px; padding:20px; background:linear-gradient(180deg, rgba(6,78,59,.30), rgba(15,23,42,.78)); box-shadow:0 20px 70px rgba(0,0,0,.28); }
-    .verdict .big { display:block; margin: 8px 0 4px; color:#b9fbcf; font-size:clamp(3rem, 8vw, 5rem); font-weight:950; letter-spacing:-.08em; line-height:.9; }
-    .verdict h2 { margin: 0; letter-spacing:-.04em; }
-    .checks { display:grid; gap:9px; margin-top:16px; }
-    .check { display:flex; gap:9px; align-items:flex-start; color:#d8e6f7; font-size:.95rem; }
-    .check::before { content:""; flex:0 0 9px; width:9px; height:9px; margin-top:7px; border-radius:999px; background:var(--green); box-shadow:0 0 16px rgba(52,211,153,.52); }
-    .metrics { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-top:16px; }
-    .metric, .card, .artifact, .attack-card, .verify-card, .story-card { border:1px solid var(--line); border-radius:22px; background:var(--panel); padding:18px; backdrop-filter:blur(14px); }
-    .metric strong { display:block; font-size:clamp(1.7rem, 4vw, 2.45rem); line-height:1; letter-spacing:-.055em; }
-    .metric span { display:block; margin-top:8px; color:var(--muted); font-size:.9rem; }
-    section { margin-top: 30px; }
-    .section-head { display:flex; justify-content:space-between; align-items:end; gap:18px; margin:42px 0 16px; }
-    h2 { margin:0; font-size:clamp(1.55rem, 3vw, 2.4rem); letter-spacing:-.048em; }
-    h3 { margin:0 0 8px; }
-    .section-head p, .muted, .card p, .artifact p, .attack-card p, .verify-card p, .story-card p { color:var(--muted); margin:0; }
-    .kicker { color: var(--cyan); font-weight: 950; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem; }
-    .scenario { display:grid; grid-template-columns: .95fr 1.05fr; gap:14px; }
-    .story-card.big { padding:24px; background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(30,41,59,.56)); }
-    .before-after { display:grid; gap:12px; }
-    .before-after .story-card { min-height:112px; }
-    .label { display:inline-flex; width:fit-content; padding:6px 9px; border-radius:999px; border:1px solid var(--line); color:#bfdbfe; background:rgba(59,130,246,.12); font-weight:900; font-size:.78rem; margin-bottom:10px; }
-    .label.stop { color:#fecdd3; border-color:rgba(251,113,133,.32); background:rgba(244,63,94,.12); }
-    .label.go { color:#bbf7d0; border-color:rgba(52,211,153,.35); background:rgba(16,185,129,.12); }
-    .timeline { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; counter-reset: step; }
-    .timeline.compact { margin-top:14px; }
-    .step { position:relative; border:1px solid var(--line); border-radius:22px; padding:17px; background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.55)); min-height:140px; overflow:hidden; }
-    .step::before { counter-increment: step; content:counter(step); display:grid; place-items:center; width:34px; height:34px; border-radius:999px; background:rgba(103,232,249,.16); color:#a5f3fc; font-weight:950; margin-bottom:12px; }
-    .step strong { display:block; }
-    .step span { display:block; color:var(--muted); margin-top:5px; font-size:.94rem; }
-    .interactive-demo { display:grid; grid-template-columns:minmax(0,1.18fr) minmax(300px,.82fr); gap:16px; align-items:stretch; }
-    .room-panel, .grant-card { border:1px solid var(--line-strong); border-radius:28px; background:linear-gradient(180deg, rgba(15,23,42,.94), rgba(2,6,23,.80)); box-shadow:var(--shadow); overflow:hidden; }
-    .room-header { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(15,23,42,.88); }
-    .room-title { display:grid; gap:2px; }
-    .room-title strong { letter-spacing:-.02em; }
-    .room-title span { color:var(--muted); font-size:.88rem; }
-    .state-badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:8px 11px; font-weight:950; font-size:.78rem; border:1px solid rgba(251,113,133,.36); background:rgba(244,63,94,.16); color:#fecdd3; }
-    .state-badge.scoped { border-color:rgba(52,211,153,.38); background:rgba(16,185,129,.14); color:#bbf7d0; }
-    .state-badge.revoked { border-color:rgba(251,191,36,.38); background:rgba(251,191,36,.12); color:#fde68a; }
-    .state-badge.sealed { border-color:rgba(103,232,249,.38); background:rgba(14,165,233,.13); color:#cffafe; }
-    .room-thread { min-height:352px; max-height:430px; overflow:auto; padding:18px; display:grid; gap:11px; align-content:start; background:radial-gradient(circle at 12% 0%, rgba(96,165,250,.14), transparent 24rem); }
-    .message { border:1px solid var(--line); border-radius:18px; padding:12px 14px; background:rgba(15,23,42,.78); }
-    .message .actor { display:block; margin-bottom:4px; color:#e0f2fe; font-weight:950; font-size:.84rem; }
-    .message.blocked { border-color:rgba(251,113,133,.32); background:rgba(127,29,29,.18); }
-    .message.safe { border-color:rgba(52,211,153,.32); background:rgba(6,78,59,.18); }
-    .message.audit { border-color:rgba(103,232,249,.32); background:rgba(14,116,144,.16); }
-    .message .meta { display:block; margin-top:6px; }
-    .demo-proof-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:0 18px 18px; background:rgba(2,6,23,.48); }
-    .proof-chip { border:1px solid var(--line); border-radius:16px; padding:11px; background:rgba(15,23,42,.78); }
-    .proof-chip strong { display:block; font-size:1.15rem; }
-    .proof-chip span { color:var(--muted); font-size:.82rem; }
-    .demo-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:18px; border-top:1px solid var(--line); background:rgba(15,23,42,.72); }
-    .demo-control { border:1px solid var(--line); border-radius:14px; padding:12px 10px; color:var(--ink); background:rgba(30,41,59,.86); font:inherit; font-weight:950; cursor:pointer; }
-    .demo-control.primary { color:#04111f; border:0; background:linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow:0 0 30px rgba(96,165,250,.22); }
-    .demo-control.danger { color:#04111f; border:0; background:linear-gradient(135deg, var(--amber), var(--red)); }
-    .demo-control:disabled { cursor:not-allowed; opacity:.42; filter:saturate(.5); }
-    .grant-card { padding:18px; display:grid; gap:14px; }
-    .grant-card .scope-list { margin:0; padding:0; list-style:none; display:grid; gap:9px; color:#dbeafe; }
-    .grant-card .scope-list li { border:1px solid var(--line); border-radius:15px; padding:10px 12px; background:rgba(15,23,42,.74); }
-    .grant-card .danger-note { border:1px solid rgba(251,113,133,.30); border-radius:18px; padding:12px 14px; color:#fecdd3; background:rgba(127,29,29,.16); }
-    .workflow-console { display:grid; grid-template-columns:minmax(280px,.74fr) minmax(0,1.26fr); gap:16px; align-items:start; }
-    .workflow-sidebar, .workflow-main { border:1px solid var(--line-strong); border-radius:28px; background:linear-gradient(180deg, rgba(15,23,42,.94), rgba(2,6,23,.80)); box-shadow:var(--shadow); overflow:hidden; }
-    .workflow-sidebar { padding:16px; display:grid; gap:10px; }
-    .workflow-stage { width:100%; text-align:left; border:1px solid var(--line); border-radius:17px; padding:13px 14px; background:rgba(15,23,42,.74); color:var(--ink); cursor:pointer; font:inherit; }
-    .workflow-stage strong { display:block; font-size:.98rem; }
-    .workflow-stage span { display:block; margin-top:4px; color:var(--muted); font-size:.84rem; }
-    .workflow-stage.active { border-color:rgba(103,232,249,.55); background:linear-gradient(180deg, rgba(14,116,144,.28), rgba(15,23,42,.82)); box-shadow:0 0 32px rgba(103,232,249,.16); }
-    .workflow-main-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(15,23,42,.84); }
-    .workflow-controls { display:flex; flex-wrap:wrap; gap:8px; }
-    .workflow-controls .demo-control { padding:10px 12px; }
-    .workflow-metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding:16px 18px 0; }
-    .workflow-metric { border:1px solid var(--line); border-radius:16px; padding:11px; background:rgba(15,23,42,.76); }
-    .workflow-metric strong { display:block; font-size:1.25rem; letter-spacing:-.04em; }
-    .workflow-metric span { color:var(--muted); font-size:.78rem; }
-    .workflow-content { display:grid; grid-template-columns:1.1fr .9fr; gap:14px; padding:18px; }
-    .event-stream { display:grid; gap:9px; max-height:520px; overflow:auto; }
-    .event-row { border:1px solid var(--line); border-radius:16px; padding:12px; background:rgba(15,23,42,.76); }
-    .event-row .event-top { display:flex; justify-content:space-between; gap:10px; align-items:start; }
-    .event-row strong { color:#e0f2fe; }
-    .event-row p { margin:7px 0 0; color:var(--muted); font-size:.9rem; }
-    .event-kind { display:inline-flex; align-items:center; border:1px solid rgba(103,232,249,.32); border-radius:999px; padding:4px 8px; color:#cffafe; background:rgba(14,165,233,.10); font-weight:950; font-size:.72rem; white-space:nowrap; }
-    .object-card { border:1px solid var(--line); border-radius:18px; padding:14px; background:rgba(2,6,23,.62); min-height:260px; }
-    .object-card h3 { margin:0 0 10px; }
-    .object-card pre { margin:0; max-height:450px; }
-    .workflow-note { margin:0; color:var(--muted); font-size:.92rem; }
-    .note { margin-top:12px; padding:13px 15px; border:1px dashed rgba(103,232,249,.35); border-radius:18px; background:rgba(14,165,233,.08); color:#dbeafe; }
-    .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
-    .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
-    .proof-groups { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-    .artifact { display:grid; gap:10px; }
-    .artifact-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
-    .pill { display:inline-flex; width:fit-content; align-items:center; gap:6px; padding:6px 9px; border:1px solid rgba(52,211,153,.34); border-radius:999px; background:rgba(16,185,129,.13); color:#bbf7d0; font-weight:900; font-size:.78rem; }
-    .meta { color:#93a4ba; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.78rem; overflow-wrap:anywhere; }
-    .verify-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
-    .badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:7px 10px; font-weight:950; font-size:.82rem; background:rgba(148,163,184,.14); color:#dbe7f5; border:1px solid var(--line); }
-    .badge.pass { background:rgba(16,185,129,.14); color:#bbf7d0; border-color:rgba(52,211,153,.35); }
-    .badge.fail { background:rgba(244,63,94,.16); color:#fecdd3; border-color:rgba(251,113,133,.35); }
-    .verify-card { border-color: rgba(52,211,153,.36); background: linear-gradient(180deg, rgba(6,78,59,.24), rgba(15,23,42,.82)); box-shadow: 0 18px 55px rgba(0,0,0,.22); }
-    .verify-card h3 { margin-top: 14px; font-size: 1.18rem; }
-    .plain-list { margin:12px 0 0; padding:0; list-style:none; display:grid; gap:9px; color:#dbeafe; }
-    .plain-list li { padding-left:22px; position:relative; }
-    .plain-list li::before { content:"✓"; position:absolute; left:0; color:var(--green); font-weight:950; }
-    .attack-grid { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; }
-    .attack-card { min-height:170px; }
-    .status { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:6px 9px; font-weight:950; font-size:.78rem; background:rgba(16,185,129,.14); color:#bbf7d0; border:1px solid rgba(52,211,153,.35); margin-bottom:12px; }
-    .status.failclosed { background:rgba(251,191,36,.12); color:#fde68a; border-color:rgba(251,191,36,.35); }
-    details { border:1px solid var(--line); border-radius:22px; background:rgba(2,6,23,.78); padding:16px 18px; }
-    summary { cursor:pointer; font-weight:950; color:#e0f2fe; }
-    pre { white-space:pre-wrap; overflow:auto; margin:14px 0 0; padding:16px; border-radius:16px; background:#020617; color:#c7d2fe; font-size:.82rem; max-height:420px; }
-    .boundary { border:1px solid rgba(251,191,36,.30); border-radius:24px; padding:18px; background:rgba(120,53,15,.16); }
-    .footer { margin-top:34px; color:var(--muted); font-size:.9rem; }
-    @media (max-width: 980px) {
-      .hero-grid, .metrics, .scenario, .timeline, .interactive-demo, .workflow-console, .workflow-metrics, .workflow-content, .demo-proof-strip, .demo-actions, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
-      .nav { align-items:flex-start; flex-direction:column; }
-      h1 { letter-spacing:-.06em; }
+    .wrap { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 18px 0 34px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:14px; color:var(--muted); font-size:.92rem; }
+    .brand { color:var(--ink); font-weight:900; letter-spacing:-.03em; }
+    .links { display:flex; gap:8px; flex-wrap:wrap; }
+    .links a, .btn {
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:8px 10px;
+      color:#d9e8fb;
+      background:#0c1323;
+      text-decoration:none;
+      font-weight:800;
+      font-size:.9rem;
+    }
+    .hero { border:1px solid var(--line); border-radius:22px; background:linear-gradient(180deg, #101827, #070b14); padding:22px; box-shadow:0 22px 90px rgba(0,0,0,.36); }
+    .eyebrow { display:inline-flex; width:fit-content; border:1px solid rgba(69,245,162,.35); border-radius:999px; padding:5px 9px; color:#b9fbd5; background:rgba(6,78,59,.18); font-size:.8rem; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    h1 { margin:12px 0 6px; font-size:clamp(2.2rem, 6vw, 5rem); line-height:.94; letter-spacing:-.07em; }
+    .lead { margin:0; max-width:860px; color:#dbeafe; font-size:clamp(1rem, 2vw, 1.22rem); }
+    .status-row { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-top:18px; }
+    .stat { border:1px solid var(--line); border-radius:14px; padding:12px; background:#08101d; }
+    .stat strong { display:block; font-size:1.55rem; letter-spacing:-.04em; color:#fff; }
+    .stat span { color:var(--muted); font-size:.82rem; }
+    .pass { color:var(--green) !important; }
+    .console-card { margin-top:16px; overflow:hidden; border:1px solid #2a3a52; border-radius:20px; background:#02050a; box-shadow:0 28px 90px rgba(0,0,0,.42); }
+    .console-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #172033; background:#090f1b; }
+    .dots { display:flex; gap:6px; }
+    .dot { width:11px; height:11px; border-radius:999px; background:#64748b; }
+    .dot.red { background:#fb7185; } .dot.yellow { background:#fbbf24; } .dot.green { background:#45f5a2; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    button.btn { cursor:pointer; color:#04111f; background:linear-gradient(135deg,var(--green),var(--cyan)); border:0; }
+    button.btn.secondary { color:#d9e8fb; background:#111a2b; border:1px solid var(--line); }
+    .console-lines {
+      margin:0;
+      min-height:430px;
+      padding:18px;
+      overflow:auto;
+      white-space:pre-wrap;
+      font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      color:#d7e7ff;
+    }
+    .line { display:block; }
+    .prompt { color:var(--cyan); font-weight:900; }
+    .ok { color:var(--green); }
+    .warn { color:var(--amber); }
+    .deny { color:var(--red); }
+    .dim { color:#8ea2bc; }
+    .proof-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .proof { border:1px solid var(--line); border-radius:14px; padding:13px; background:#08101d; }
+    .badge { display:inline-flex; width:fit-content; border:1px solid var(--line); border-radius:999px; padding:5px 8px; color:#d9e8fb; background:#101827; font-weight:900; font-size:.78rem; }
+    .badge.pass { border-color:rgba(69,245,162,.45); color:#b9fbd5; background:rgba(6,78,59,.20); }
+    .badge.fail { border-color:rgba(251,113,133,.45); color:#fecdd3; background:rgba(127,29,29,.20); }
+    .proof h2, .proof h3 { margin:8px 0 5px; font-size:1.05rem; }
+    .proof p, .fine { margin:0; color:var(--muted); font-size:.91rem; }
+    .downloads { margin-top:14px; border:1px solid var(--line); border-radius:16px; padding:14px; background:#08101d; }
+    .download-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-top:10px; }
+    .download-grid a { display:block; border:1px solid var(--line); border-radius:12px; padding:10px; text-decoration:none; background:#0e1626; }
+    .meta { display:block; color:#91a4bd; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.76rem; overflow-wrap:anywhere; }
+    details { margin-top:14px; border:1px solid var(--line); border-radius:16px; padding:14px; background:#070c16; }
+    summary { cursor:pointer; font-weight:900; color:#d9e8fb; }
+    pre#verification { margin:12px 0 0; max-height:260px; overflow:auto; color:#c7d2fe; white-space:pre-wrap; font:13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .boundary { margin-top:14px; color:#d8e6f7; border:1px dashed rgba(251,191,36,.36); border-radius:16px; padding:13px; background:rgba(120,53,15,.14); }
+    .footer { margin-top:14px; color:var(--muted); font-size:.86rem; }
+    @media (max-width: 820px) {
+      .topbar { align-items:flex-start; flex-direction:column; }
+      .status-row, .proof-strip, .download-grid { grid-template-columns:1fr; }
+      .console-head { align-items:flex-start; flex-direction:column; }
+      .console-lines { min-height:360px; font-size:12px; }
     }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <nav class="nav" aria-label="RoomKey navigation">
-      <div class="brand"><div class="mark">RK</div><span>RoomKey ScopeGate</span></div>
-      <div class="nav-links">
-        <a href="#story">Why it matters</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#demo">Demo</a>
+  <main class="wrap">
+    <nav class="topbar" aria-label="RoomKey navigation">
+      <div class="brand">RoomKey ScopeGate</div>
+      <div class="links">
+        <a href="#console">Console</a>
         <a href="#proof">Proof</a>
-        <a href="#verify">Verify it</a>
-        <a href="#attacks">Attacks</a>
         <a href="../README.md">README</a>
       </div>
     </nav>
 
     <header class="hero">
-      <div class="hero-grid">
-        <div>
-          <span class="eyebrow">Receipt-pinned Band demo · browser verification</span>
-          <h1>Give every agent room a disclosure gate.</h1>
-          <p class="lead">Agent rooms make multi-agent work fast. In regulated work, speed is not enough: <strong>a room is not permission to reveal sensitive context.</strong> RoomKey makes disclosure wait for a narrow human grant, then leaves a receipt a judge can check.</p>
-          <p class="plain">This supplier bank-change run proves the bounded result: protected values did not enter shared Band history, late replay stayed blocked, and the site receipt still matches the sealed receipt.</p>
-          <div class="cta-row">
-            <a class="btn primary" href="#workflow">Play actual receipt run</a>
-            <a class="btn" href="#demo">Try the gate</a>
-            <a class="btn" href="#verify">Verify proof</a>
-            <a class="btn" href="#proof">Download receipts</a>
-          </div>
-        </div>
-        <aside class="verdict" aria-label="Proof summary">
-          <h2>Current run</h2>
-          <span class="big" id="hero-status">Checking</span>
-          <p id="hero-status-copy">Fresh browser checks are running on this page. They verify that the public files, receipt copy, and pinned hashes still agree for this prototype run.</p>
-          <div class="checks">
-            <span class="check">5 agents traced in the receipt.</span>
-            <span class="check">25 Band message IDs witnessed.</span>
-            <span class="check">0 protected payload values found in shared room history.</span>
-            <span class="check">Revoked access and late replay stayed blocked.</span>
-          </div>
-        </aside>
-      </div>
-      <div class="metrics" aria-label="Live proof metrics">
-        <div class="metric"><strong id="agent-count">5</strong><span>agents in trace</span></div>
-        <div class="metric"><strong id="band-count">25</strong><span>Band messages witnessed</span></div>
-        <div class="metric"><strong id="secret-status">0</strong><span>protected values posted</span></div>
-        <div class="metric"><strong id="replay-status">Checking</strong><span>late replay blocked</span></div>
+      <span class="eyebrow">Recorded Band run · browser-checked receipt</span>
+      <h1>Console receipt run</h1>
+      <p class="lead">One screen. Commands, gate output, receipt PASS. This page is a receipt viewer for the recorded supplier bank-change review: protected values did not appear in shared Band history in this run, late replay stayed blocked, and the browser checks the hashes.</p>
+      <div class="status-row" aria-label="Run summary">
+        <div class="stat"><strong id="hero-status">Checking</strong><span id="hero-status-copy">browser verifier starting</span></div>
+        <div class="stat"><strong id="agent-count">5</strong><span>agents traced</span></div>
+        <div class="stat"><strong id="band-count">25</strong><span>Band messages</span></div>
+        <div class="stat"><strong id="secret-status">0</strong><span>protected values posted</span></div>
+        <div class="stat"><strong id="replay-status">Checking</strong><span>late replay blocked</span></div>
       </div>
     </header>
 
-    <section id="workflow">
-      <div class="section-head">
-        <div>
-          <span class="kicker">Actual backend workflow</span>
-          <h2>Watch the sealed Band run, not a toy mockup.</h2>
-        </div>
-        <p>These panels are populated from the receipt JSON: gate events, Band message IDs, hashed context releases, reviewer deposits, revocation, replay block, and final seal.</p>
-      </div>
-      <div class="workflow-console" aria-label="Actual backend workflow receipt player">
-        <aside class="workflow-sidebar">
-          <span class="eyebrow">Backend event stream</span>
-          <p class="workflow-note">Click a stage or press play. Every row is backed by the sealed receipt and public evidence bundle.</p>
-          <div id="workflow-stage-list" aria-label="Workflow stages"></div>
-        </aside>
-        <div class="workflow-main">
-          <div class="workflow-main-head">
-            <div>
-              <h3 id="workflow-stage-title">Loading backend run…</h3>
-              <p class="workflow-note" id="workflow-stage-copy">Receipt data is loading from the public bundle.</p>
-            </div>
-            <div class="workflow-controls">
-              <button class="demo-control primary" type="button" id="workflow-play">Play actual receipt run</button>
-              <button class="demo-control" type="button" id="workflow-seal">Jump to seal</button>
-            </div>
-          </div>
-          <div class="workflow-metrics" aria-label="Backend workflow counters">
-            <div class="workflow-metric"><strong id="workflow-band-count">—</strong><span>Live Band messages</span></div>
-            <div class="workflow-metric"><strong id="workflow-gate-count">—</strong><span>Gate engine events</span></div>
-            <div class="workflow-metric"><strong id="workflow-context-count">—</strong><span>Context releases</span></div>
-            <div class="workflow-metric"><strong id="workflow-reviewer-count">—</strong><span>Reviewer deposits</span></div>
-            <div class="workflow-metric"><strong id="workflow-block-count">—</strong><span>Post-revocation blocks</span></div>
-          </div>
-          <div class="workflow-content">
-            <div>
-              <span class="kicker">Backend event stream</span>
-              <div id="workflow-event-stream" class="event-stream" aria-live="polite"></div>
-            </div>
-            <div class="object-card">
-              <h3>Receipt object</h3>
-              <pre id="workflow-object-detail">Loading receipt object…</pre>
-            </div>
-          </div>
+    <section id="console" class="console-card" aria-label="Console demo">
+      <div class="console-head">
+        <div class="dots" aria-hidden="true"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+        <div class="actions">
+          <button class="btn" type="button" id="console-run">Run console demo</button>
+          <button class="btn secondary" type="button" id="console-jump-pass">Jump to final PASS</button>
         </div>
       </div>
-      <p class="note">Backend showcase: ScopeGate did not just animate a button. The receipt shows <strong>Live Band messages</strong>, <strong>Gate engine</strong> decisions, <strong>Context releases</strong> as hashes/counts, <strong>Reviewer deposits</strong>, <strong>Post-revocation blocks</strong>, and the final browser-verifiable seal.</p>
+      <pre id="console-lines" class="console-lines"><span class="line prompt">$ roomkey scopegate run --case VENDOR-WIRE-1849 --band live</span>
+<span class="line dim">mode=live_band_spear · supplier bank-change review · authority-before-disclosure</span>
+<span class="line deny">pre-grant BLOCK: action denied before human scope grant</span>
+<span class="line ok">human grant: one case, named agents, safe context keys only</span>
+<span class="line ok">context releases: hashes/counts posted, raw protected values withheld</span>
+<span class="line ok">reviewer deposits: 3 independent reviewer decisions recorded</span>
+<span class="line warn">revoke: grant closed after review window</span>
+<span class="line deny">late replay BLOCKED: late participant recovered no protected context</span>
+<span class="line ok">receipt sealed: waiting for browser verification…</span>
+<span class="line prompt">$ roomkey verify receipts/live-band-demo-20260618T185330Z.json</span></pre>
     </section>
 
-    <section id="demo">
-      <div class="section-head">
-        <div>
-          <span class="kicker">The five moves</span>
-          <h2>Try the gate.</h2>
-        </div>
-        <p>Click through the supplier bank-change room: blocked first, scoped by a human, revoked, replay denied, receipt sealed.</p>
-      </div>
-      <div class="interactive-demo" aria-label="Interactive RoomKey ScopeGate simulator">
-        <div class="room-panel">
-          <div class="room-header">
-            <div class="room-title">
-              <strong>Band room simulation</strong>
-              <span>Vendor bank-change approval · CASE VENDOR-WIRE-1849</span>
-            </div>
-            <span id="demo-state-badge" class="state-badge">LOCKED</span>
-          </div>
-          <div id="demo-transcript" class="room-thread" aria-live="polite"></div>
-          <div class="demo-proof-strip" aria-label="Demo safety counters">
-            <div class="proof-chip"><strong id="demo-secret-count">0</strong><span>protected values posted</span></div>
-            <div class="proof-chip"><strong id="demo-replay-state">not tested</strong><span>late replay result</span></div>
-            <div class="proof-chip"><strong id="demo-receipt-state">open</strong><span>receipt state</span></div>
-          </div>
-          <div class="demo-actions" aria-label="Run the ScopeGate flow">
-            <button class="demo-control primary" type="button" data-action="request">Start request</button>
-            <button class="demo-control primary" type="button" data-action="grant">Grant Scope</button>
-            <button class="demo-control" type="button" data-action="review">Run scoped review</button>
-            <button class="demo-control danger" type="button" data-action="revoke">Revoke key</button>
-            <button class="demo-control" type="button" data-action="late-replay">Try late replay</button>
-            <button class="demo-control" type="button" data-action="seal">Seal receipt</button>
-          </div>
-        </div>
-        <aside class="grant-card" aria-label="Human scope grant details">
-          <span class="eyebrow">Human authority, not room authority</span>
-          <h3>What the grant allows</h3>
-          <ul class="scope-list">
-            <li><strong>Case:</strong> supplier bank-change review only.</li>
-            <li><strong>Agents:</strong> requester, evidence, risk, reviewer, action.</li>
-            <li><strong>Safe fields:</strong> invoice summary, vendor record hash, policy excerpt, risk memo.</li>
-            <li><strong>Human grants scope:</strong> today’s review, not future access.</li>
-          </ul>
-          <div class="danger-note"><strong>Never released to shared room:</strong> raw account number, routing number, secret canary, or reusable credential material.</div>
-          <p class="muted">This is a static simulator backed by the sealed run below. It demonstrates the product shape without needing a live backend or exposing secrets.</p>
-        </aside>
-      </div>
-      <div class="timeline compact" aria-label="ScopeGate flow summary">
-        <div class="step"><strong>Agent asks</strong><span>A supplier bank-change review needs evidence, risk, reviewers, and action in one Band room.</span></div>
-        <div class="step"><strong>Gate blocks</strong><span>No approval means no raw banking values in shared room history.</span></div>
-        <div class="step"><strong>Human grants scope</strong><span>The finance lead approves this case, these agents, and these safe fields for today.</span></div>
-        <div class="step"><strong>Scoped collaboration</strong><span>Agents work from safe summaries, hashes, policy excerpts, and reviewer decisions.</span></div>
-        <div class="step"><strong>Revoked + Sealed</strong><span>The key stops working. Late replay stays blocked. The receipt records what happened.</span></div>
-      </div>
-      <p class="note">The thing to remember: this run showed collaboration without disclosure. Protected values did not enter shared Band history, replay stayed blocked, and the receipt still matches.</p>
+    <section id="proof" class="proof-strip" aria-label="Browser proof">
+      <article class="proof"><span id="contract-badge" class="badge">Checking…</span><h2>Evidence bundle</h2><p id="download-check">Download hashes are being checked.</p><p id="proof-check" class="fine">Proof flags are being checked.</p></article>
+      <article class="proof"><span id="schema-badge" class="badge">Checking…</span><h2>Receipt contract</h2><p id="secrets-check">Secret-scan fields are being checked.</p><p id="replay-check" class="fine">Replay result is being checked.</p></article>
+      <article class="proof"><span id="hash-badge" class="badge">Checking…</span><h2>Receipt hash</h2><p id="receipt-hash-short">loading…</p></article>
     </section>
 
-    <section id="story">
-      <div class="section-head">
-        <h2>Why a room needs a key</h2>
-        <p>A shared room coordinates work. It should not become a permission boundary by accident.</p>
-      </div>
-      <div class="scenario">
-        <article class="story-card big">
-          <span class="kicker">The moment</span>
-          <h3>A supplier wants to change where money gets sent.</h3>
-          <p>Finance wants help from an evidence agent, a risk agent, reviewers, and an action agent. That is good room work. It is also exactly where raw bank details should stay scoped.</p>
-        </article>
-        <div class="before-after">
-          <article class="story-card"><span class="label stop">Without RoomKey</span><h3>The room becomes authority by accident.</h3><p>An agent asks, another agent shares, and the transcript may now hold material that should have stayed scoped.</p></article>
-          <article class="story-card"><span class="label go">With RoomKey</span><h3>The human grant becomes the key.</h3><p>The room discusses safe summaries first. Sensitive context waits for scoped approval. The run ends with a receipt a judge can check.</p></article>
-        </div>
+    <section class="downloads" aria-label="Downloads">
+      <strong>Download proof pack and receipts</strong>
+      <p class="fine">Judge path: proof pack first, receipt JSON if they want to audit. This is a receipt-pinned prototype run; it does not prove production security.</p>
+      <div class="download-grid">
+        <a download href="../proof/ROOMKEY_PROOF_PACK.md">Download proof pack<span class="meta">f7ba5141…215195</span></a>
+        <a download href="../receipts/live-band-demo-20260618T185330Z.json">Receipt JSON<span class="meta">f6d2d843…fa3b81</span></a>
+        <a download href="../proof/USE_CASE_VENDOR_WIRE_APPROVAL.md">Use-case brief<span class="meta">ae7d7196…3a3eb9</span></a>
+        <a download href="../proof/ATTACK_MATRIX.json">Attack matrix<span class="meta">e9b97929…debe24</span></a>
+        <a download href="../proof/TEXT_INJECTION_MUTATION_RECEIPT.md">Mutation receipt<span class="meta">d379f365…279c5f</span></a>
+        <a download href="evidence.json">Evidence JSON<span class="meta">1ac4f1c0…04d666</span></a>
+        <a download href="../docs/PUBLIC_SUBMIT_SEAL.md">Submit seal<span class="meta">9336e4d8…432643</span></a>
       </div>
     </section>
 
-    <section id="human">
-      <div class="section-head">
-        <h2>How it feels to use</h2>
-        <p>It should feel like approving a risky operation, not editing a schema.</p>
-      </div>
-      <div class="grid-2">
-        <article class="card"><span class="label stop">Before approval</span><h3>ScopeGate says no.</h3><p>“I can help with the review, but I need approval for this case before sensitive banking context can be released.”</p></article>
-        <article class="card"><span class="label go">Human approval</span><h3>The manager says yes, narrowly.</h3><p>“Approve this supplier review for today. Let the evidence, risk, reviewer, and action agents use the invoice summary, vendor record hash, policy excerpt, and risk memo. Do not post raw account details.”</p></article>
-        <article class="card"><span class="label go">During review</span><h3>Agents can work.</h3><p>The room sees safe summaries, hashes, decisions, and gate state. Sensitive values stay out of the shared transcript.</p></article>
-        <article class="card"><span class="label stop">After revocation</span><h3>The key stops working.</h3><p>Late replay does not recover protected context. The run is sealed for audit.</p></article>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-head">
-        <h2>Where this fits</h2>
-        <p>RoomKey is reusable. The supplier review is just the first visible case.</p>
-      </div>
-      <div class="grid-3">
-        <article class="card"><h3>Finance</h3><p>Vendor bank changes, payment approvals, procurement exceptions, invoice disputes.</p></article>
-        <article class="card"><h3>Healthcare</h3><p>Case review where agents can collaborate without putting patient details into broad room history.</p></article>
-        <article class="card"><h3>Legal and compliance</h3><p>Document triage, incident response, policy review, or investigations where access needs a receipt.</p></article>
-      </div>
-    </section>
-
-    <section id="verify">
-      <div class="section-head">
-        <h2>What can you verify yourself?</h2>
-        <p>The green badges are not screenshots. Your browser checks the files from this page every time it loads.</p>
-      </div>
-      <div class="verify-grid">
-        <article class="verify-card"><span id="contract-badge" class="badge">Checking…</span><h3>The public bundle is intact</h3><p>The evidence file has the use case, agent trace, attack results, download list, proof flags, and seal ID.</p><ul class="plain-list"><li id="download-check">Download hashes are being checked.</li><li id="proof-check">Proof flags are being checked.</li></ul></article>
-        <article class="verify-card"><span id="schema-badge" class="badge">Checking…</span><h3>The receipt has the right shape</h3><p>The browser checks for Band message IDs, gate events, reviewer deposits, revocation, and secret-scan fields.</p><ul class="plain-list"><li id="secrets-check">Protected values are being checked.</li><li id="replay-check">Late replay is being checked.</li></ul></article>
-        <article class="verify-card"><span id="hash-badge" class="badge">Checking…</span><h3>The receipt was not swapped</h3><p>The receipt inside the site must match the canonical receipt and the pinned hash.</p><p class="meta" id="receipt-hash-short">loading…</p></article>
-      </div>
-      <div class="note">
-        Want to check deeper? Clone the repo and run <span class="meta">python scripts/submit_check.py</span>. That runs the stricter CLI gate, full tests, schema checks, integrity checks, banned-copy checks, and the browser verifier harness.
-      </div>
-      <div class="grid-2" style="margin-top:14px">
-        <article class="card">
-          <span class="kicker">Decode the receipt</span>
-          <h3>What am I actually checking?</h3>
-          <p>The headline tells you the claim. The hashes tell you whether the receipt you downloaded is the same receipt the page claims. The secret-scan flags tell you whether protected values showed up in shared room history in this run.</p>
-        </article>
-        <article class="card">
-          <span class="kicker">Plain audit</span>
-          <h3>What should match?</h3>
-          <p><span class="meta">canonical_receipt_sha256</span> should match <span class="meta">browser_receipt_hash</span>. <span class="meta">live_receipt_file_sha256</span> should match <span class="meta">browser_receipt_file_hash</span>. Protected-value flags should stay <span class="meta">false</span>.</p>
-        </article>
-      </div>
-    </section>
-
-    <section id="proof">
-      <div class="section-head">
-        <h2>Proof you can download</h2>
-        <p>Judges can read the short proof path. Auditors can pull the receipt and manifest.</p>
-      </div>
-      <div class="proof-groups">
-        <div>
-          <span class="kicker">For judges</span>
-          <div class="grid-2" style="margin-top:12px">
-            <article class="artifact"><div class="artifact-row"><h3>Proof pack</h3><span class="pill">Hash-pinned</span></div><p>The short story: problem, run, attacks survived, boundary.</p><span class="meta">2.6 KB · f7ba5141…215195</span><a class="btn" download href="../proof/ROOMKEY_PROOF_PACK.md">Download proof pack</a></article>
-            <article class="artifact"><div class="artifact-row"><h3>Use-case brief</h3><span class="pill">Hash-pinned</span></div><p>The supplier bank-change scenario in plain English.</p><span class="meta">1.3 KB · ae7d7196…3a3eb9</span><a class="btn" download href="../proof/USE_CASE_VENDOR_WIRE_APPROVAL.md">Download use case</a></article>
-            <article class="artifact"><div class="artifact-row"><h3>Attack matrix</h3><span class="pill">Hash-pinned</span></div><p>The attacks we ran and what failed closed.</p><span class="meta">1.5 KB · e9b97929…debe24</span><a class="btn" download href="../proof/ATTACK_MATRIX.json">Download attack matrix</a></article>
-          </div>
-        </div>
-        <div>
-          <span class="kicker">For auditors</span>
-          <div class="grid-2" style="margin-top:12px">
-            <article class="artifact"><div class="artifact-row"><h3>Receipt JSON</h3><span class="pill">Hash-pinned</span></div><p>The canonical proof root for this run.</p><span class="meta">47.2 KB · f6d2d843…fa3b81</span><a class="btn" download href="../receipts/live-band-demo-20260618T185330Z.json">Download receipt JSON</a></article>
-            <article class="artifact"><div class="artifact-row"><h3>Mutation receipt</h3><span class="pill">Hash-pinned</span></div><p>Shows hostile prompt-like text stayed inert.</p><span class="meta">1.7 KB · d379f365…279c5f</span><a class="btn" download href="../proof/TEXT_INJECTION_MUTATION_RECEIPT.md">Download mutation receipt</a></article>
-            <article class="artifact"><div class="artifact-row"><h3>Evidence manifest</h3><span class="pill">Self-checking</span></div><p>Public bundle tying the page to receipts and downloads.</p><span class="meta">7.9 KB · 1ac4f1c0…04d666</span><a class="btn" download href="evidence.json">Download evidence JSON</a></article>
-            <article class="artifact"><div class="artifact-row"><h3>Submit seal</h3><span class="pill">Hash-pinned</span></div><p>Deployment/readback status and receipt hashes.</p><span class="meta">1.7 KB · 9336e4d8…432643</span><a class="btn" download href="../docs/PUBLIC_SUBMIT_SEAL.md">Download seal</a></article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="attacks">
-      <div class="section-head">
-        <h2>Attack resistance proven in this run</h2>
-        <p>The point is not that nothing can ever break. The point is that the obvious ways to fake the proof failed closed in this package.</p>
-      </div>
-      <div class="attack-grid">
-        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Receipt divergence</h3><p>Change the receipt root or file hash and the verifier goes red.</p></article>
-        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Schema corruption</h3><p>Malformed receipt/public proof files fail before submit.</p></article>
-        <article class="attack-card"><span class="status failclosed">FAIL-CLOSED</span><h3>Forged Band IDs</h3><p>Placeholder or forged-looking message IDs do not pass the local submit gate.</p></article>
-        <article class="attack-card"><span class="status">INERT</span><h3>Prompt-like text</h3><p>Hostile text in public evidence fields does not become authority.</p></article>
-        <article class="attack-card"><span class="status failclosed">BLOCKED</span><h3>Overclaim copy</h3><p>Public text that claims more than the prototype proved is blocked.</p></article>
-      </div>
-    </section>
-
-    <section>
-      <details>
-        <summary>Auditor details: raw verifier lines</summary>
-        <p class="muted" style="margin-top:10px">These are the machine receipts behind the green cards above. You do not need them to understand the demo; they are here so the proof can be checked rather than trusted.</p>
-        <pre id="verification">Loading verifier…</pre>
-      </details>
-    </section>
+    <details>
+      <summary>Raw verifier lines</summary>
+      <pre id="verification">Loading verifier…</pre>
+    </details>
 
     <section class="boundary">
-      <h2>Boundary</h2>
-      <p class="muted">This proves a receipt-pinned prototype run and the local attack-resistance checks for this package. It does not prove production security, independent Band-side security, or exhaustive future deployment safety.</p>
+      <strong>Boundary:</strong> this is not a live app. It is a static console-style receipt viewer for a recorded Band run. It proves the public files, receipt shape, and hashes for this prototype run only.
     </section>
 
     <p class="footer">Seal post: <span class="meta" id="seal-id">loading…</span> · Last browser check: <span id="last-updated">loading…</span></p>

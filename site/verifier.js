@@ -54,6 +54,66 @@ function shortHash(hash) {
   return hash ? hash.slice(0, 12) + '…' + hash.slice(-10) : 'unavailable';
 }
 
+let currentConsoleRun = null;
+let consoleTimer = null;
+function consoleRow(text, tone) {
+  const cls = tone ? ` ${tone}` : '';
+  return `<span class="line${cls}">${escapeHtml(text)}</span>`;
+}
+function buildConsoleReceiptLines(receipt, evidence) {
+  const reviewerDeposits = receipt.reviewer_deposits?.length || 0;
+  const contextReleases = receipt.context_releases?.length || 0;
+  const postRevocationBlocks = receipt.post_revocation_blocks?.length || 0;
+  return [
+    { text: '$ roomkey scopegate run --case VENDOR-WIRE-1849 --band live', tone: 'prompt' },
+    { text: `mode=${receipt.mode} · case=${receipt.case_id} · Band messages=${receipt.band_message_ids?.length || 0}`, tone: 'dim' },
+    { text: 'pre-grant BLOCK: action denied before human scope grant', tone: 'deny' },
+    { text: `human grant: ${receipt.grant_id} · agents=${receipt.grant?.allowed_agents?.length || 0} · safe keys=${receipt.grant?.allowed_context_keys?.length || 0}`, tone: 'ok' },
+    { text: `context releases: ${contextReleases} safe hashes/counts posted; raw protected values withheld`, tone: 'ok' },
+    { text: `reviewer deposits: ${reviewerDeposits} independent decisions recorded`, tone: 'ok' },
+    { text: `revoke: grant closed; post-revocation blocks=${postRevocationBlocks}`, tone: 'warn' },
+    { text: 'late replay BLOCKED: late participant recovered no protected context', tone: 'deny' },
+    { text: `receipt sealed: ${shortHash(receipt.receipt_sha256)} · seal=${evidence.seal_post_message_id}`, tone: 'ok' },
+    { text: '$ roomkey verify receipts/live-band-demo-20260618T185330Z.json', tone: 'prompt' },
+    { text: 'PASS_ROOMKEY_PROOF agents_named=true agent_trace_present=true reviewer_deposits=3', tone: 'ok' },
+    { text: `PASS browser_receipt_hash=${shortHash(evidence.canonical_receipt_sha256)} live_file=${shortHash(evidence.live_receipt_file_sha256)}`, tone: 'ok' },
+    { text: 'PASS protected_payload_value_posted=false raw_secret_canary_posted=false late_replay_recovered=false', tone: 'ok' }
+  ];
+}
+function renderConsoleReceiptRun(receipt, evidence, options = {}) {
+  const target = document.getElementById('console-lines');
+  if (!target) return;
+  currentConsoleRun = { receipt, evidence };
+  const rows = buildConsoleReceiptLines(receipt, evidence);
+  const count = options.final ? rows.length : Math.max(9, Math.min(options.count || rows.length, rows.length));
+  target.innerHTML = rows.slice(0, count).map(row => consoleRow(row.text, row.tone)).join('\n');
+  target.scrollTop = target.scrollHeight;
+}
+function playConsoleReceiptRun() {
+  if (!currentConsoleRun) return;
+  window.clearInterval(consoleTimer);
+  let count = 1;
+  renderConsoleReceiptRun(currentConsoleRun.receipt, currentConsoleRun.evidence, { count });
+  const total = buildConsoleReceiptLines(currentConsoleRun.receipt, currentConsoleRun.evidence).length;
+  consoleTimer = window.setInterval(() => {
+    count += 1;
+    renderConsoleReceiptRun(currentConsoleRun.receipt, currentConsoleRun.evidence, { count });
+    if (count >= total) window.clearInterval(consoleTimer);
+  }, 260);
+}
+function initConsoleDemo() {
+  const run = document.getElementById('console-run');
+  const jump = document.getElementById('console-jump-pass');
+  if (run && !run.dataset.bound) {
+    run.dataset.bound = 'true';
+    run.addEventListener('click', playConsoleReceiptRun);
+  }
+  if (jump && !jump.dataset.bound) {
+    jump.dataset.bound = 'true';
+    jump.addEventListener('click', () => currentConsoleRun && renderConsoleReceiptRun(currentConsoleRun.receipt, currentConsoleRun.evidence, { final: true }));
+  }
+}
+
 const scopeGateDemoState = {
   requested: false,
   granted: false,
@@ -333,6 +393,7 @@ async function verify() {
   setText('hero-status', 'Checking');
   setText('hero-status-copy', 'The browser is checking the receipt, proof bundle, and pinned hashes now.');
   setText('seal-id', evidence.seal_post_message_id);
+  renderConsoleReceiptRun(receipt, evidence, { final: true });
   const backendWorkflow = buildBackendWorkflow(receipt, evidence);
   renderBackendWorkflow(backendWorkflow, 0);
   setupBackendWorkflowControls();
@@ -393,6 +454,7 @@ async function verify() {
   setText('last-updated', new Date().toISOString());
   setText('verification', lines.join('\n'));
 }
+initConsoleDemo();
 initScopeGateDemo();
 verify().catch(err => {
   setBadge('contract-badge', false, 'Error');
