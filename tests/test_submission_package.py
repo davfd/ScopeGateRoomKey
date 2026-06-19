@@ -233,9 +233,15 @@ def test_public_copy_rule_map_and_banned_claims():
         'protected values did not appear in shared Band history in this run',
         'authority-before-disclosure', '3+ agents', 'official Band Agent API',
         'supplier bank-change review', 'Download proof pack', 'receipt-pinned prototype run',
+        'No-video judge path', 'SUBMITTING_WITHOUT_VIDEO', 'This is not a live app.',
+        'video_status=OMITTED_FOR_SUBMISSION',
     ]:
         assert required in combined
-    for removed in ['old comparison matrix', 'external-work superiority section', 'Other Band projects make agents ' + 'collaborate', 'not another workflow ' + 'room']:
+    for removed in [
+        'old comparison matrix', 'external-work superiority section',
+        'Other Band projects make agents ' + 'collaborate', 'not another workflow ' + 'room',
+        'SCRIPT_READY_MP4_OR_UPLOAD_STILL_REQUIRED', 'VIDEO_RECORDING_PENDING', 'NEEDS RECORDING',
+    ]:
         assert removed.lower() not in combined.lower()
 
     for banned in [

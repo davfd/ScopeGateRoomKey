@@ -12,6 +12,16 @@ def test_readme_states_public_judge_path_without_banned_band_claims():
     assert 'Key insight' in readme
     assert 'canonical_receipt_sha256' in readme
     assert 'browser_receipt_hash' in readme
+    assert 'No-video judge path' in readme
+    assert 'If there is no video, start here.' in readme
+    assert 'This is not a live app.' in readme
+    assert 'Real CLI transcript' in readme
+    assert 'python scripts/receipt_timeline.py receipts/live-band-demo-20260618T185330Z.json' in readme
+    assert 'PYTHONPATH=src python -m roomkey.cli verify receipts/live-band-demo-20260618T185330Z.json' in readme
+    assert 'python scripts/judge_proof.py receipts/live-band-demo-20260618T185330Z.json' in readme
+    assert 'python scripts/browser_verifier_contract_check.py --root .' in readme
+    assert 'media/lablab-cover-16x9.png' in readme
+    assert 'media/github-roomkey-banner-1500x500.png' not in readme
     for banned in [
         'Band privacy ' + 'firewall', 'Band enforces ' + 'consent', 'Guaranteed consent ' + 'enforcement',
         'guaranteed consent ' + 'enforcement', 'Band prevents ' + 'replay',
