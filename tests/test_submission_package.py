@@ -20,8 +20,9 @@ def test_public_package_required_files_exist():
         'docs/LABLAB_SUBMISSION_PACKET.md', 'docs/LABLAB_VIDEO_SCRIPT.md', 'docs/lablab-roomkey-slide-deck.pdf',
         'media/lablab-cover-16x9.png',
         'scripts/judge_proof.py', 'scripts/secret_scan.py', 'scripts/integrity_check.py', 'scripts/site_check.py',
-        'scripts/submit_check.py', 'scripts/browser_verifier_contract_check.py',
-        'site/index.html', 'site/evidence.json', 'site/verifier.js', 'site/receipts/live-band-demo-20260618T185330Z.json',
+        'scripts/submit_check.py', 'scripts/browser_verifier_contract_check.py', 'scripts/receipt_timeline.py',
+        'scripts/build_cli_transcript.py',
+        'site/index.html', 'site/evidence.json', 'site/verifier.js', 'site/cli-transcript.txt', 'site/receipts/live-band-demo-20260618T185330Z.json',
         'receipts/live-band-demo-20260618T185330Z.json',
         'receipts/live-band-demo-20260618T185330Z-seal-post.json',
     ]
@@ -49,6 +50,65 @@ def test_judge_proof_prints_agent_trace_and_negative_proof():
     ]:
         assert needle in out
 
+
+def test_receipt_timeline_cli_prints_real_workflow_from_receipt():
+    receipt = ROOT / 'receipts' / 'live-band-demo-20260618T185330Z.json'
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / 'scripts' / 'receipt_timeline.py'), str(receipt)],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    out = proc.stdout
+    for needle in [
+        'PASS_RECEIPT_TIMELINE',
+        'case_id=vendor-wire-001',
+        'mode=live_band_spear',
+        'band_messages=25',
+        '03 pre-grant BLOCK action=send_wire_review reason=no scoped grant',
+        '05 human grant GRANTED grant_id=grant_0204c5961d10',
+        '10 context RELEASED key=policy_excerpt raw_posted=false',
+        '11 late replay BLOCKED participant=Unapproved Auditor recovered=false',
+        '14 reviewer DEPOSIT reviewer=ReviewerA verdict=ALLOW independent=true raw_posted=false',
+        '21 review gate ADJUDICATED outcome=HUMAN_ESCALATE reviewers=3',
+        '22 grant REVOKED grant_id=grant_0204c5961d10',
+        '23 post-revocation BLOCK action=send_wire_review reason=grant revoked',
+        '24 context BLOCKED key=policy_excerpt reason=grant revoked',
+        '25 receipt SEALED receipt_sha256=b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925',
+        'protected_payload_value_posted=false',
+        'raw_secret_canary_posted=false',
+        'late_replay_recovered=false',
+    ]:
+        assert needle in out
+
+
+def test_cli_transcript_is_real_command_output_not_button_animation():
+    transcript = (ROOT / 'site' / 'cli-transcript.txt').read_text(encoding='utf-8')
+    html = (ROOT / 'site' / 'index.html').read_text(encoding='utf-8')
+    verifier = (ROOT / 'site' / 'verifier.js').read_text(encoding='utf-8')
+
+    for needle in [
+        '$ python scripts/receipt_timeline.py receipts/live-band-demo-20260618T185330Z.json',
+        'PASS_RECEIPT_TIMELINE',
+        '03 pre-grant BLOCK action=send_wire_review reason=no scoped grant',
+        '25 receipt SEALED receipt_sha256=b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925',
+        '$ PYTHONPATH=src python -m roomkey.cli verify receipts/live-band-demo-20260618T185330Z.json',
+        'PASS_DEMO_PROOF',
+        '$ python scripts/judge_proof.py receipts/live-band-demo-20260618T185330Z.json',
+        'PASS_ROOMKEY_PROOF',
+        '$ python scripts/browser_verifier_contract_check.py --root .',
+        'browser_receipt_hash_check=PASS',
+        'browser_site_canonical_receipt_match=PASS',
+    ]:
+        assert needle in transcript
+
+    assert 'Real CLI transcript' in html
+    assert "fetchText('cli-transcript.txt')" in verifier
+    assert 'Run console demo' not in html
+    assert 'console-run' not in html
+
 def test_site_evidence_is_machine_readable_and_matches_receipt():
     evidence = json.loads((ROOT / 'site' / 'evidence.json').read_text(encoding='utf-8'))
     assert evidence['canonical_receipt_sha256'] == 'b737b1087e8af84c23e6e3a341038735511606b391641c57a056fb3f1f543925'
@@ -65,30 +125,23 @@ def test_site_browser_verifier_wording_matches_console_surface():
 
     assert 'Live Band receipt verified in ' + 'browser' not in html
     assert '<h3>Receipt ' + 'schema</h3>' not in html
-    assert 'Console receipt run' in html
-    assert 'Run console demo' in html
-    assert 'roomkey scopegate run --case VENDOR-WIRE-1849 --band live' in html
-    assert 'roomkey verify receipts/live-band-demo-20260618T185330Z.json' in html
+    assert 'Real CLI transcript' in html
+    assert 'No fake run button' in html
+    assert 'site/cli-transcript.txt' in html
     assert 'id="console-lines"' in html
-    assert 'id="console-run"' in html
-    assert 'id="console-jump-pass"' in html
-    assert 'pre-grant BLOCK' in html
-    assert 'human grant' in html
-    assert 'late replay BLOCKED' in html
     assert 'Download proof pack' in html
     assert 'receipt-pinned prototype run' in html
     for removed in [
-        'Actual backend workflow', 'Try the gate', 'The five moves', 'How it feels to use',
+        'Run console demo', 'console-run', 'Actual backend workflow', 'Try the gate', 'The five moves', 'How it feels to use',
         'Where this fits', 'Attack resistance proven in this run', 'id="demo-transcript"',
         'id="workflow-stage-list"',
     ]:
         assert removed not in html
 
     assert "fetchText('../receipts/live-band-demo-20260618T185330Z.json')" in verifier
-    assert 'initConsoleDemo' in verifier
-    assert 'renderConsoleReceiptRun' in verifier
+    assert 'loadCliTranscript' in verifier
+    assert "fetchText('cli-transcript.txt')" in verifier
     assert 'console-lines' in verifier
-    assert 'late replay BLOCKED' in verifier
     assert 'evidence.canonical_receipt_sha256 === actual' in verifier
     assert 'evidence.live_receipt_file_sha256 === siteFileHash' in verifier
     assert 'evidence.live_receipt_file_sha256 === canonicalFileHash' in verifier
@@ -144,35 +197,30 @@ def test_site_exposes_single_console_demo_not_crowded_brochure():
     verifier = (ROOT / 'site' / 'verifier.js').read_text(encoding='utf-8')
 
     for needle in [
-        'Console receipt run',
-        'One screen. Commands, gate output, receipt PASS.',
-        'Run console demo',
-        'Jump to final PASS',
-        '$ roomkey scopegate run --case VENDOR-WIRE-1849 --band live',
-        '$ roomkey verify receipts/live-band-demo-20260618T185330Z.json',
-        'pre-grant BLOCK',
-        'late replay BLOCKED',
-        'receipt sealed',
+        'Real CLI transcript',
+        'No fake run button',
+        'actual CLI commands and captured stdout',
+        'site/cli-transcript.txt',
+        'generated by scripts/build_cli_transcript.py',
         'id="console-lines"',
         'id="verification"',
     ]:
         assert needle in html
 
     for needle in [
-        'renderConsoleReceiptRun',
-        'initConsoleDemo',
-        'console-jump-pass',
-        'reviewer deposits',
-        'context releases',
-        'receipt sealed',
+        'loadCliTranscript',
+        "fetchText('cli-transcript.txt')",
+        'console-lines',
     ]:
         assert needle in verifier
 
     for removed in [
         'workflow-console', 'interactive-demo', 'story-card', 'attack-grid',
-        'Play actual receipt run', 'Grant Scope', 'Run scoped review',
+        'Play actual receipt run', 'Grant Scope', 'Run scoped review', 'Run console demo', 'console-run',
+        'renderConsoleReceiptRun', 'initConsoleDemo',
     ]:
         assert removed not in html
+        assert removed not in verifier
 
 
 def test_public_copy_rule_map_and_banned_claims():
@@ -181,7 +229,7 @@ def test_public_copy_rule_map_and_banned_claims():
         for path in [ROOT / 'README.md', *sorted((ROOT / 'docs').glob('*.md')), ROOT / 'site' / 'index.html', *sorted((ROOT / 'proof').glob('*'))]
     )
     for required in [
-        'Console receipt run',
+        'Real CLI transcript',
         'protected values did not appear in shared Band history in this run',
         'authority-before-disclosure', '3+ agents', 'official Band Agent API',
         'supplier bank-change review', 'Download proof pack', 'receipt-pinned prototype run',
