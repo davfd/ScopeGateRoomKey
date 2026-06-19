@@ -69,7 +69,15 @@ def test_site_browser_verifier_wording_matches_proof_surface():
     assert 'protected values did not enter shared Band history' in html
     assert 'The five moves' in html
     assert 'Human grants scope' in html
+    assert 'Start request' in html
     assert 'Grant Scope' in html
+    assert 'Run scoped review' in html
+    assert 'Revoke key' in html
+    assert 'Try late replay' in html
+    assert 'Seal receipt' in html
+    assert 'id="demo-transcript"' in html
+    assert 'data-action="grant"' in html
+    assert 'data-action="late-replay"' in html
     assert 'Scoped collaboration' in html
     assert 'Revoked + Sealed' in html
     assert 'What can you verify yourself?' in html
@@ -77,6 +85,10 @@ def test_site_browser_verifier_wording_matches_proof_surface():
     assert 'Auditor details: raw verifier lines' in html
 
     assert "fetchText('../receipts/live-band-demo-20260618T185330Z.json')" in verifier
+    assert 'initScopeGateDemo' in verifier
+    assert 'handleScopeGateDemoAction' in verifier
+    assert 'late-replay' in verifier
+    assert 'Protected values stay at 0' in verifier
     assert 'evidence.canonical_receipt_sha256 === actual' in verifier
     assert 'evidence.live_receipt_file_sha256 === siteFileHash' in verifier
     assert 'evidence.live_receipt_file_sha256 === canonicalFileHash' in verifier

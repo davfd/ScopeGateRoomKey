@@ -78,20 +78,41 @@
     .label.stop { color:#fecdd3; border-color:rgba(251,113,133,.32); background:rgba(244,63,94,.12); }
     .label.go { color:#bbf7d0; border-color:rgba(52,211,153,.35); background:rgba(16,185,129,.12); }
     .timeline { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; counter-reset: step; }
-    .step { position:relative; border:1px solid var(--line); border-radius:22px; padding:17px; background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.55)); min-height:160px; overflow:hidden; }
+    .timeline.compact { margin-top:14px; }
+    .step { position:relative; border:1px solid var(--line); border-radius:22px; padding:17px; background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.55)); min-height:140px; overflow:hidden; }
     .step::before { counter-increment: step; content:counter(step); display:grid; place-items:center; width:34px; height:34px; border-radius:999px; background:rgba(103,232,249,.16); color:#a5f3fc; font-weight:950; margin-bottom:12px; }
     .step strong { display:block; }
     .step span { display:block; color:var(--muted); margin-top:5px; font-size:.94rem; }
-    .consent-strip { display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap:12px; align-items:stretch; margin-top:16px; }
-    .consent-state { border:1px solid var(--line); border-radius:22px; padding:17px; background:rgba(15,23,42,.72); }
-    .consent-state.locked { border-color:rgba(251,113,133,.36); background:linear-gradient(180deg, rgba(127,29,29,.22), rgba(15,23,42,.72)); }
-    .consent-state.granted { border-color:rgba(52,211,153,.42); background:linear-gradient(180deg, rgba(6,78,59,.30), rgba(15,23,42,.76)); }
-    .consent-state.sealed { border-color:rgba(103,232,249,.36); background:linear-gradient(180deg, rgba(14,116,144,.20), rgba(15,23,42,.74)); }
-    .consent-state .icon { display:inline-grid; place-items:center; width:36px; height:36px; margin-bottom:10px; border-radius:14px; background:rgba(148,163,184,.13); }
-    .consent-state strong { display:block; font-size:1.05rem; }
-    .consent-state span { display:block; color:var(--muted); margin-top:5px; font-size:.92rem; }
-    .consent-button { align-self:center; display:inline-flex; align-items:center; justify-content:center; min-width:132px; padding:12px 14px; border-radius:999px; color:#04111f; background:linear-gradient(135deg, var(--green), var(--cyan)); font-weight:950; box-shadow:0 0 30px rgba(52,211,153,.24); text-align:center; }
-    .consent-button.close { background:linear-gradient(135deg, var(--amber), var(--cyan)); }
+    .interactive-demo { display:grid; grid-template-columns:minmax(0,1.18fr) minmax(300px,.82fr); gap:16px; align-items:stretch; }
+    .room-panel, .grant-card { border:1px solid var(--line-strong); border-radius:28px; background:linear-gradient(180deg, rgba(15,23,42,.94), rgba(2,6,23,.80)); box-shadow:var(--shadow); overflow:hidden; }
+    .room-header { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(15,23,42,.88); }
+    .room-title { display:grid; gap:2px; }
+    .room-title strong { letter-spacing:-.02em; }
+    .room-title span { color:var(--muted); font-size:.88rem; }
+    .state-badge { display:inline-flex; align-items:center; gap:7px; border-radius:999px; padding:8px 11px; font-weight:950; font-size:.78rem; border:1px solid rgba(251,113,133,.36); background:rgba(244,63,94,.16); color:#fecdd3; }
+    .state-badge.scoped { border-color:rgba(52,211,153,.38); background:rgba(16,185,129,.14); color:#bbf7d0; }
+    .state-badge.revoked { border-color:rgba(251,191,36,.38); background:rgba(251,191,36,.12); color:#fde68a; }
+    .state-badge.sealed { border-color:rgba(103,232,249,.38); background:rgba(14,165,233,.13); color:#cffafe; }
+    .room-thread { min-height:352px; max-height:430px; overflow:auto; padding:18px; display:grid; gap:11px; align-content:start; background:radial-gradient(circle at 12% 0%, rgba(96,165,250,.14), transparent 24rem); }
+    .message { border:1px solid var(--line); border-radius:18px; padding:12px 14px; background:rgba(15,23,42,.78); }
+    .message .actor { display:block; margin-bottom:4px; color:#e0f2fe; font-weight:950; font-size:.84rem; }
+    .message.blocked { border-color:rgba(251,113,133,.32); background:rgba(127,29,29,.18); }
+    .message.safe { border-color:rgba(52,211,153,.32); background:rgba(6,78,59,.18); }
+    .message.audit { border-color:rgba(103,232,249,.32); background:rgba(14,116,144,.16); }
+    .message .meta { display:block; margin-top:6px; }
+    .demo-proof-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:0 18px 18px; background:rgba(2,6,23,.48); }
+    .proof-chip { border:1px solid var(--line); border-radius:16px; padding:11px; background:rgba(15,23,42,.78); }
+    .proof-chip strong { display:block; font-size:1.15rem; }
+    .proof-chip span { color:var(--muted); font-size:.82rem; }
+    .demo-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:18px; border-top:1px solid var(--line); background:rgba(15,23,42,.72); }
+    .demo-control { border:1px solid var(--line); border-radius:14px; padding:12px 10px; color:var(--ink); background:rgba(30,41,59,.86); font:inherit; font-weight:950; cursor:pointer; }
+    .demo-control.primary { color:#04111f; border:0; background:linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow:0 0 30px rgba(96,165,250,.22); }
+    .demo-control.danger { color:#04111f; border:0; background:linear-gradient(135deg, var(--amber), var(--red)); }
+    .demo-control:disabled { cursor:not-allowed; opacity:.42; filter:saturate(.5); }
+    .grant-card { padding:18px; display:grid; gap:14px; }
+    .grant-card .scope-list { margin:0; padding:0; list-style:none; display:grid; gap:9px; color:#dbeafe; }
+    .grant-card .scope-list li { border:1px solid var(--line); border-radius:15px; padding:10px 12px; background:rgba(15,23,42,.74); }
+    .grant-card .danger-note { border:1px solid rgba(251,113,133,.30); border-radius:18px; padding:12px 14px; color:#fecdd3; background:rgba(127,29,29,.16); }
     .note { margin-top:12px; padding:13px 15px; border:1px dashed rgba(103,232,249,.35); border-radius:18px; background:rgba(14,165,233,.08); color:#dbeafe; }
     .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
     .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
@@ -119,7 +140,7 @@
     .boundary { border:1px solid rgba(251,191,36,.30); border-radius:24px; padding:18px; background:rgba(120,53,15,.16); }
     .footer { margin-top:34px; color:var(--muted); font-size:.9rem; }
     @media (max-width: 980px) {
-      .hero-grid, .metrics, .scenario, .timeline, .consent-strip, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
+      .hero-grid, .metrics, .scenario, .timeline, .interactive-demo, .demo-proof-strip, .demo-actions, .grid-3, .grid-2, .proof-groups, .verify-grid, .attack-grid { grid-template-columns: 1fr; }
       .nav { align-items:flex-start; flex-direction:column; }
       h1 { letter-spacing:-.06em; }
     }
@@ -147,8 +168,8 @@
           <p class="lead">Agent rooms make multi-agent work fast. In regulated work, speed is not enough: <strong>a room is not permission to reveal sensitive context.</strong> RoomKey makes disclosure wait for a narrow human grant, then leaves a receipt a judge can check.</p>
           <p class="plain">This supplier bank-change run proves the bounded result: protected values did not enter shared Band history, late replay stayed blocked, and the site receipt still matches the sealed receipt.</p>
           <div class="cta-row">
-            <a class="btn primary" href="#verify">Verify it yourself</a>
-            <a class="btn" href="#demo">Watch the flow</a>
+            <a class="btn primary" href="#demo">Try the gate</a>
+            <a class="btn" href="#verify">Verify proof</a>
             <a class="btn" href="#proof">Download receipts</a>
           </div>
         </div>
@@ -174,22 +195,55 @@
 
     <section id="demo">
       <div class="section-head">
-        <h2>The five moves</h2>
-        <p>Read this once and the whole demo should make sense.</p>
+        <div>
+          <span class="kicker">The five moves</span>
+          <h2>Try the gate.</h2>
+        </div>
+        <p>Click through the supplier bank-change room: blocked first, scoped by a human, revoked, replay denied, receipt sealed.</p>
       </div>
-      <div class="timeline">
+      <div class="interactive-demo" aria-label="Interactive RoomKey ScopeGate simulator">
+        <div class="room-panel">
+          <div class="room-header">
+            <div class="room-title">
+              <strong>Band room simulation</strong>
+              <span>Vendor bank-change approval · CASE VENDOR-WIRE-1849</span>
+            </div>
+            <span id="demo-state-badge" class="state-badge">LOCKED</span>
+          </div>
+          <div id="demo-transcript" class="room-thread" aria-live="polite"></div>
+          <div class="demo-proof-strip" aria-label="Demo safety counters">
+            <div class="proof-chip"><strong id="demo-secret-count">0</strong><span>protected values posted</span></div>
+            <div class="proof-chip"><strong id="demo-replay-state">not tested</strong><span>late replay result</span></div>
+            <div class="proof-chip"><strong id="demo-receipt-state">open</strong><span>receipt state</span></div>
+          </div>
+          <div class="demo-actions" aria-label="Run the ScopeGate flow">
+            <button class="demo-control primary" type="button" data-action="request">Start request</button>
+            <button class="demo-control primary" type="button" data-action="grant">Grant Scope</button>
+            <button class="demo-control" type="button" data-action="review">Run scoped review</button>
+            <button class="demo-control danger" type="button" data-action="revoke">Revoke key</button>
+            <button class="demo-control" type="button" data-action="late-replay">Try late replay</button>
+            <button class="demo-control" type="button" data-action="seal">Seal receipt</button>
+          </div>
+        </div>
+        <aside class="grant-card" aria-label="Human scope grant details">
+          <span class="eyebrow">Human authority, not room authority</span>
+          <h3>What the grant allows</h3>
+          <ul class="scope-list">
+            <li><strong>Case:</strong> supplier bank-change review only.</li>
+            <li><strong>Agents:</strong> requester, evidence, risk, reviewer, action.</li>
+            <li><strong>Safe fields:</strong> invoice summary, vendor record hash, policy excerpt, risk memo.</li>
+            <li><strong>Human grants scope:</strong> today’s review, not future access.</li>
+          </ul>
+          <div class="danger-note"><strong>Never released to shared room:</strong> raw account number, routing number, secret canary, or reusable credential material.</div>
+          <p class="muted">This is a static simulator backed by the sealed run below. It demonstrates the product shape without needing a live backend or exposing secrets.</p>
+        </aside>
+      </div>
+      <div class="timeline compact" aria-label="ScopeGate flow summary">
         <div class="step"><strong>Agent asks</strong><span>A supplier bank-change review needs evidence, risk, reviewers, and action in one Band room.</span></div>
-        <div class="step"><strong>Gate blocks</strong><span>No approval means no raw banking values in shared room history. The room can still discuss safe labels and hashes.</span></div>
+        <div class="step"><strong>Gate blocks</strong><span>No approval means no raw banking values in shared room history.</span></div>
         <div class="step"><strong>Human grants scope</strong><span>The finance lead approves this case, these agents, and these safe fields for today.</span></div>
-        <div class="step"><strong>Safe collaboration</strong><span>Agents review summaries, hashes, policy excerpts, and reviewer decisions without exposing protected values.</span></div>
-        <div class="step"><strong>Revoke + seal</strong><span>The key stops working. Late replay stays blocked. The receipt records what happened.</span></div>
-      </div>
-      <div class="consent-strip" aria-label="Scope grant state transition">
-        <div class="consent-state locked"><span class="icon">🔒</span><strong>Blocked</strong><span>No grant: protected banking values cannot enter shared Band history.</span></div>
-        <div class="consent-button">Grant Scope</div>
-        <div class="consent-state granted"><span class="icon">🗝️</span><strong>Scoped collaboration</strong><span>Human approves this case, these agents, and these safe fields for today.</span></div>
-        <div class="consent-button close">Revoke</div>
-        <div class="consent-state sealed"><span class="icon">🧾</span><strong>Revoked + Sealed</strong><span>The key closes, replay stays blocked, and the receipt records the run.</span></div>
+        <div class="step"><strong>Scoped collaboration</strong><span>Agents work from safe summaries, hashes, policy excerpts, and reviewer decisions.</span></div>
+        <div class="step"><strong>Revoked + Sealed</strong><span>The key stops working. Late replay stays blocked. The receipt records what happened.</span></div>
       </div>
       <p class="note">The thing to remember: this run showed collaboration without disclosure. Protected values did not enter shared Band history, replay stayed blocked, and the receipt still matches.</p>
     </section>

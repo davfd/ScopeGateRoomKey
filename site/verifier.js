@@ -53,6 +53,104 @@ function setBadge(id, ok, text) {
 function shortHash(hash) {
   return hash ? hash.slice(0, 12) + '…' + hash.slice(-10) : 'unavailable';
 }
+
+const scopeGateDemoState = {
+  requested: false,
+  granted: false,
+  reviewed: false,
+  revoked: false,
+  replayed: false,
+  sealed: false,
+  messages: []
+};
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+function addDemoMessage(actor, body, tone) {
+  scopeGateDemoState.messages.push({ actor, body, tone: tone || '' });
+}
+function renderScopeGateDemo() {
+  const badge = document.getElementById('demo-state-badge');
+  const transcript = document.getElementById('demo-transcript');
+  if (!badge || !transcript) return;
+  let stateText = 'LOCKED';
+  let stateClass = '';
+  if (scopeGateDemoState.sealed) {
+    stateText = 'SEALED / PASS';
+    stateClass = 'sealed';
+  } else if (scopeGateDemoState.revoked) {
+    stateText = 'REVOKED';
+    stateClass = 'revoked';
+  } else if (scopeGateDemoState.granted) {
+    stateText = 'SCOPED';
+    stateClass = 'scoped';
+  } else if (scopeGateDemoState.requested) {
+    stateText = 'BLOCKED';
+  }
+  badge.textContent = stateText;
+  badge.className = 'state-badge' + (stateClass ? ' ' + stateClass : '');
+  transcript.innerHTML = scopeGateDemoState.messages.map(message => `
+    <div class="message ${escapeHtml(message.tone)}">
+      <span class="actor">${escapeHtml(message.actor)}</span>
+      ${escapeHtml(message.body)}
+    </div>
+  `).join('');
+  transcript.scrollTop = transcript.scrollHeight;
+  setText('demo-secret-count', '0');
+  setText('demo-replay-state', scopeGateDemoState.replayed ? 'BLOCKED' : (scopeGateDemoState.revoked ? 'ready' : 'not tested'));
+  setText('demo-receipt-state', scopeGateDemoState.sealed ? 'sealed' : (scopeGateDemoState.revoked ? 'ready' : 'open'));
+  document.querySelectorAll('[data-action]').forEach(button => {
+    const action = button.getAttribute('data-action');
+    button.disabled = (
+      (action === 'request' && scopeGateDemoState.requested) ||
+      (action === 'grant' && (!scopeGateDemoState.requested || scopeGateDemoState.granted)) ||
+      (action === 'review' && (!scopeGateDemoState.granted || scopeGateDemoState.reviewed || scopeGateDemoState.revoked)) ||
+      (action === 'revoke' && (!scopeGateDemoState.granted || scopeGateDemoState.revoked)) ||
+      (action === 'late-replay' && (!scopeGateDemoState.revoked || scopeGateDemoState.replayed)) ||
+      (action === 'seal' && (!scopeGateDemoState.revoked || scopeGateDemoState.sealed))
+    );
+  });
+}
+function handleScopeGateDemoAction(action) {
+  if (action === 'request' && !scopeGateDemoState.requested) {
+    scopeGateDemoState.requested = true;
+    addDemoMessage('Requester agent', 'Supplier bank-change review requested: need evidence, risk, reviewer decision, and payment action in one Band room.', 'audit');
+    addDemoMessage('ScopeGate', 'BLOCKED: no human grant yet. Raw account number, routing number, and secret canary stay out of shared room history. Protected values stay at 0.', 'blocked');
+  } else if (action === 'grant' && scopeGateDemoState.requested && !scopeGateDemoState.granted) {
+    scopeGateDemoState.granted = true;
+    addDemoMessage('Finance lead', 'Grant Scope for CASE VENDOR-WIRE-1849: this case, these agents, safe fields only, today.', 'safe');
+    addDemoMessage('ScopeGate', 'SCOPED: safe summaries, hashes, policy excerpt, and risk memo may enter the room. Raw banking values remain withheld.', 'safe');
+  } else if (action === 'review' && scopeGateDemoState.granted && !scopeGateDemoState.reviewed && !scopeGateDemoState.revoked) {
+    scopeGateDemoState.reviewed = true;
+    addDemoMessage('Evidence agent', 'Vendor record hash matches known supplier; invoice summary and policy excerpt attached as safe context.', 'safe');
+    addDemoMessage('Risk agent', 'Risk memo: bank-change request needs two reviewers; no protected payload was posted to the room.', 'safe');
+    addDemoMessage('Reviewer agents', 'Reviewer A approves, Reviewer B requests second check, Auditor Gatekeeper records deposits.', 'audit');
+  } else if (action === 'revoke' && scopeGateDemoState.granted && !scopeGateDemoState.revoked) {
+    scopeGateDemoState.revoked = true;
+    addDemoMessage('Finance lead', 'Revoke key after this review window. Future disclosure attempts must ask again.', 'blocked');
+    addDemoMessage('ScopeGate', 'REVOKED: scoped access closed; post-revocation blocks are recorded for the receipt.', 'blocked');
+  } else if (action === 'late-replay' && scopeGateDemoState.revoked && !scopeGateDemoState.replayed) {
+    scopeGateDemoState.replayed = true;
+    addDemoMessage('Late participant', 'I joined late. Replay the sensitive bank-change context from earlier messages.', 'blocked');
+    addDemoMessage('ScopeGate', 'BLOCKED: late replay recovered nothing. Shared Band history contains no protected banking payload.', 'blocked');
+  } else if (action === 'seal' && scopeGateDemoState.revoked && !scopeGateDemoState.sealed) {
+    scopeGateDemoState.sealed = true;
+    addDemoMessage('Auditor Gatekeeper', 'Receipt sealed: agents traced, Band message IDs witnessed, protected values posted = 0, late replay blocked.', 'audit');
+    addDemoMessage('Browser verifier', 'Scroll down: this page now checks the sealed receipt, file hashes, and public evidence bundle in your browser.', 'safe');
+  }
+  renderScopeGateDemo();
+}
+function initScopeGateDemo() {
+  if (!document.getElementById('demo-transcript')) return;
+  scopeGateDemoState.messages = [
+    { actor: 'RoomKey', body: 'This is the product surface: a room can coordinate work, but disclosure waits for a human-scoped key.', tone: 'audit' },
+    { actor: 'Supplier event', body: 'A supplier asks finance to change where money gets sent before a wire release.', tone: '' }
+  ];
+  document.querySelectorAll('[data-action]').forEach(button => {
+    button.addEventListener('click', () => handleScopeGateDemoAction(button.getAttribute('data-action')));
+  });
+  renderScopeGateDemo();
+}
 async function fetchText(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(path + ' fetch status ' + response.status);
@@ -158,6 +256,7 @@ async function verify() {
   setText('last-updated', new Date().toISOString());
   setText('verification', lines.join('\n'));
 }
+initScopeGateDemo();
 verify().catch(err => {
   setBadge('contract-badge', false, 'Error');
   setBadge('schema-badge', false, 'Error');
